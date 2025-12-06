@@ -107,7 +107,7 @@ class HttpResponseTest {
         response.setStatus(HttpStatus.BAD_REQUEST);
 
         // when
-        String statusLine = new String(response.getBytes(), StandardCharsets.UTF_8);
+        String statusLine = new String(response.toBytes(), StandardCharsets.UTF_8);
 
         // then
         assertEquals("HTTP/1.1 400 Bad Request\r\n", statusLine);
@@ -122,7 +122,7 @@ class HttpResponseTest {
         response.addHeader("Content-Type", "text/plain");
 
         // when
-        String headersString = new String(response.getBytes(), StandardCharsets.UTF_8);
+        String headersString = new String(response.toBytes(), StandardCharsets.UTF_8);
 
         // then
         assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n", headersString);
@@ -138,7 +138,7 @@ class HttpResponseTest {
         response.addHeader("Content-Type", "text/plain");
 
         // when
-        String responseString = new String(response.getBytes(), StandardCharsets.UTF_8);
+        String responseString = new String(response.toBytes(), StandardCharsets.UTF_8);
 
         // then
         String[] parts = responseString.split("\r\n\r\n", 2);

@@ -34,7 +34,7 @@ public class RequestHandler {
             HttpRequest request = HttpRequest.parse(rawRequest);
             HttpResponse response = new HttpResponse();
             httpHandler.handle(request, response);
-            outputStream.write(response.getBytes());
+            outputStream.write(response.toBytes());
             outputStream.flush();
         } catch (Exception e) {
             log.error("Exception while handling request:", e);

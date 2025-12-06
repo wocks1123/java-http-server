@@ -63,7 +63,7 @@ public class HttpResponse {
         this.headers.put(name, value);
     }
 
-    public byte[] getBytes() {
+    public byte[] toBytes() {
         StringBuilder response = new StringBuilder();
 
         response.append(String.format("%s %d %s\r\n", version, status.getCode(), status.getMessage()));
