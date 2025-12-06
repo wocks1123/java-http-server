@@ -12,12 +12,23 @@ public class ServletContainer {
         servletMap.put(path, servlet);
     }
 
-    public Servlet findServlet(String path) {
-        return servletMap.get(path);
-    }
-
     public Servlet resolveServlet(String path) {
-        throw new UnsupportedOperationException("구현 예정");
+        Servlet servlet = servletMap.get(path);
+        if (servlet != null) {
+            return servlet;
+        }
+
+        for (Map.Entry<String, Servlet> entry : servletMap.entrySet()) {
+            String key = entry.getKey();
+            if (key.endsWith("/*")) {
+                String basePath = key.substring(0, key.length() - 1);
+                if (path.startsWith(basePath)) {
+                    return entry.getValue();
+                }
+            }
+        }
+
+        return null;
     }
 
 }

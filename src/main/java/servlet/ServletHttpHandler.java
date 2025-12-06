@@ -16,7 +16,7 @@ public class ServletHttpHandler implements HttpHandler {
 
     @Override
     public void handle(HttpRequest request, HttpResponse response) {
-        Servlet servlet = servletContainer.findServlet(request.getPath());
+        Servlet servlet = servletContainer.resolveServlet(request.getPath());
         if (servlet == null) {
             response.setStatus(HttpStatus.NOT_FOUND);
             return;
