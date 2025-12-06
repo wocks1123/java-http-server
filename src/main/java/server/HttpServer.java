@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import servlet.ServletContainer;
 import servlet.ServletHttpHandler;
+import servlet.StaticResourceServlet;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,28 +23,30 @@ public class HttpServer {
     public static void main(String[] args) {
         log.info("WebServer started on port " + PORT);
 
+        ServletContainer servletContainer = new ServletContainer();
+        servletContainer.registerServlet("/*", (request, response) -> {
+            response.setStatus(HttpStatus.OK);
+            response.setBody("Hello, World!\r\n");
+        });
+        servletContainer.registerServlet("/static/*", new StaticResourceServlet());
+
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
                 Socket clientSocket = serverSocket.accept();
                 log.info("Client connected: {}", clientSocket.getInetAddress());
 
-                handleRequest(clientSocket);
+                handleRequest(clientSocket, servletContainer);
             }
         } catch (Exception e) {
             log.error("Server error:", e);
         }
     }
 
-    private static void handleRequest(Socket socket) {
+    private static void handleRequest(Socket socket, ServletContainer servletContainer) {
         try (
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream()
         ) {
-            ServletContainer servletContainer = new ServletContainer();
-            servletContainer.registerServlet("/hello", (request, response) -> {
-                response.setStatus(HttpStatus.OK);
-                response.setBody("Hello, World!\r\n");
-            });
             RequestHandler requestHandler = new RequestHandler(new ServletHttpHandler(servletContainer));
             requestHandler.handle(inputStream, outputStream);
         } catch (IOException e) {
