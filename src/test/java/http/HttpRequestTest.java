@@ -136,4 +136,37 @@ class HttpRequestTest {
         );
     }
 
+    @Test
+    @DisplayName("body가 없는 POST 요청 파싱")
+    void parsePostRequestWithoutBody() {
+        // given
+        final byte[] rawRequest = ("""
+                POST /submit HTTP/1.1\r
+                Host: localhost:8080\r
+                Content-Type: application/x-www-form-urlencoded\r
+                \r
+                """)
+                .getBytes();
+
+        // when
+        final HttpRequest httpRequest = HttpRequest.parse(rawRequest);
+
+        // then
+        assertAll("POST request without body",
+                () -> assertEquals(HttpMethod.POST, httpRequest.getMethod()),
+                () -> assertEquals("/submit", httpRequest.getPath()),
+                () -> assertEquals("HTTP/1.1", httpRequest.getVersion()),
+                () -> {
+                    Map<String, String> headers = httpRequest.getHeaders();
+                    assertAll("Headers",
+                            () -> assertEquals(2, headers.size()),
+                            () -> assertEquals("localhost:8080", headers.get("Host")),
+                            () -> assertEquals("application/x-www-form-urlencoded", headers.get("Content-Type"))
+                    );
+                },
+                () -> assertEquals("", httpRequest.getBody())
+        );
+    }
+
+
 }
