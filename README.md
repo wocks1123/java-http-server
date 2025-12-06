@@ -39,12 +39,12 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
     * [x] ServerSocket으로 연결 수락
     * [x] 하드코딩된 HTTP 응답 전송
 
-* [ ] HTTP 요청/응답 파싱
-    * [ ] Request Line 파싱 (Method, Path, Version)
-    * [ ] Header 파싱
-    * [ ] Body 파싱 (POST)
-    * [ ] HttpRequest / HttpResponse 클래스 설계
-    * [ ] 단위 테스트 작성
+* [x] HTTP 요청/응답 파싱
+    * [x] Request Line 파싱 (Method, Path, Version)
+    * [x] Header 파싱
+    * [x] Body 파싱 (POST)
+    * [x] HttpRequest / HttpResponse 클래스 설계
+    * [x] 단위 테스트 작성
 
 * [ ] RequestHandler 구현
     * [ ] InputStream → HttpRequest
