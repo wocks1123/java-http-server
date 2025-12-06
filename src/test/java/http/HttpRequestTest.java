@@ -100,4 +100,40 @@ class HttpRequestTest {
         );
     }
 
+    @Test
+    @DisplayName("POST 요청을 HttpRequest 객체로 변환")
+    void parsePostRequest() {
+        // given
+        final String requestBody = "name=JohnDoe&age=29&city=NY";
+        final byte[] rawRequest = ("""
+                POST /submit HTTP/1.1\r
+                Host: localhost:8080\r
+                Content-Type: application/x-www-form-urlencoded\r
+                Content-Length: %d\r
+                \r
+                %s
+                """.formatted(requestBody.length(), requestBody)
+        ).getBytes();
+
+        // when
+        final HttpRequest httpRequest = HttpRequest.parse(rawRequest);
+
+        // then
+        assertAll("HTTP Request Line",
+                () -> assertEquals(HttpMethod.POST, httpRequest.getMethod()),
+                () -> assertEquals("/submit", httpRequest.getPath()),
+                () -> assertEquals("HTTP/1.1", httpRequest.getVersion()),
+                () -> {
+                    Map<String, String> headers = httpRequest.getHeaders();
+                    assertAll("Headers",
+                            () -> assertEquals(3, headers.size()),
+                            () -> assertEquals("localhost:8080", headers.get("Host")),
+                            () -> assertEquals("application/x-www-form-urlencoded", headers.get("Content-Type")),
+                            () -> assertEquals("27", headers.get("Content-Length"))
+                    );
+                },
+                () -> assertEquals(requestBody, httpRequest.getBody())
+        );
+    }
+
 }
