@@ -1,4 +1,4 @@
-package webserver;
+package server;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,9 +8,9 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class WebServer {
+public class HttpServer {
 
-    private static final Logger log = LoggerFactory.getLogger(WebServer.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
 
 
     private static final int PORT = 8080;
