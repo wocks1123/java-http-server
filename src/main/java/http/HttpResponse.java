@@ -48,6 +48,10 @@ public class HttpResponse {
     }
 
     public void setBody(String body) {
+        if (body == null) {
+            body = "";
+        }
+        this.headers.put("Content-Length", Integer.toString(body.length()));
         this.body = body;
     }
 
@@ -56,13 +60,9 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        if (body != null) {
-            headers.put("Content-Length", String.valueOf(body.getBytes().length));
-        }
         String response = """
                 %s %d %s\r
-                %s\r
-                %s
+                %s%s\r
                 """
                 .formatted(
                         version, status.getCode(), status.getMessage(),
