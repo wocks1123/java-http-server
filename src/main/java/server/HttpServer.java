@@ -2,6 +2,7 @@ package server;
 
 import http.HttpRequest;
 import http.HttpResponse;
+import http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,8 @@ public class HttpServer {
     static class SimpleHttpHandler implements HttpHandler {
         @Override
         public void handle(HttpRequest request, HttpResponse response) {
-            // Do nothing
+            response.setStatus(HttpStatus.OK);
+            response.setBody("Hello World\r\n");
         }
     }
 
