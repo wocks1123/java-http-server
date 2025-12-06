@@ -2,6 +2,7 @@ package http;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class HttpRequest {
 
@@ -87,4 +88,26 @@ public class HttpRequest {
     public Map<String, String> getQueryParams() {
         return queryParams;
     }
+
+    public String toString() {
+        String base = String.format("[HttpRequest] %s %s %s", method, path, version);
+
+        String queryParamsSection = queryParams.isEmpty() ? "" :
+                "\n\n[Query Parameters]\n" +
+                queryParams.entrySet().stream()
+                        .map(e -> String.format("  %s = %s", e.getKey(), e.getValue()))
+                        .collect(Collectors.joining("\n"));
+
+        String headersSection = headers.isEmpty() ? "" :
+                "\n\n[Headers]\n" +
+                headers.entrySet().stream()
+                        .map(e -> String.format("  %s: %s", e.getKey(), e.getValue()))
+                        .collect(Collectors.joining("\n"));
+
+        String bodySection = (body == null || body.isEmpty()) ? "" :
+                "\n\n[Body]\n" + body;
+
+        return base + queryParamsSection + headersSection + bodySection;
+    }
+
 }
