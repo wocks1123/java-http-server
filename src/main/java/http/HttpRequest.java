@@ -56,6 +56,11 @@ public class HttpRequest {
             }
         }
 
+        int contentLength = headers.containsKey("Content-Length") ? Integer.parseInt(headers.get("Content-Length")) : 0;
+        if (contentLength > 0 && bodyPart.length() > contentLength) {
+            bodyPart = bodyPart.substring(0, contentLength);
+        }
+
         return new HttpRequest(method, path, version, queryParams, headers, bodyPart);
     }
 
