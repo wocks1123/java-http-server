@@ -16,4 +16,8 @@ public class ServletContainer {
         return servletMap.get(path);
     }
 
+    public Servlet resolveServlet(String path) {
+        throw new UnsupportedOperationException("구현 예정");
+    }
+
 }

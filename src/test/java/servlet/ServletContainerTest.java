@@ -47,4 +47,44 @@ class ServletContainerTest {
         assertNull(foundServlet);
     }
 
+    @Test
+    @DisplayName("와일드카드 패턴으로 서블릿을 등록할 수 있다")
+    void testRegisterServletWithWildcardPattern() {
+        // given
+
+        // when
+
+        // then
+    }
+
+    @Test
+    @DisplayName("와일드카드 패턴과 일치하지 않는 경로는 매칭되지 않는다")
+    void testWildcardPatternDoesNotMatchDifferentPath() {
+        // given
+
+        // when
+
+        // then
+    }
+
+    @Test
+    @DisplayName("정확한 경로 매칭이 와일드카드 패턴보다 우선한다")
+    void testExactPathMatchHasPriorityOverWildcard() {
+        // given
+
+        // when
+
+        // then
+    }
+
+    @Test
+    @DisplayName("루트 와일드카드 패턴으로 모든 경로를 처리할 수 있다")
+    void testRootWildcardPatternMatchesAllPaths() {
+        // given
+
+        // when
+
+        // then
+    }
+
 }
