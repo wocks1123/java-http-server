@@ -1,5 +1,6 @@
 package http;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class HttpRequest {
@@ -19,7 +20,27 @@ public class HttpRequest {
     }
 
     public static HttpRequest parse(byte[] rawRequest) {
-        throw new UnsupportedOperationException("TODO: 구현 필요");
+        String requestString = new String(rawRequest);
+        String[] requestParts = requestString.split("\r\n\r\n", 2);
+        String headerPart = requestParts[0];
+        String bodyPart = requestParts.length > 1 ? requestParts[1] : "";
+
+        String[] lines = headerPart.split("\r\n");
+        String requestLine = lines[0];
+        String[] requestLineParts = requestLine.split(" ");
+        HttpMethod method = HttpMethod.valueOf(requestLineParts[0]);
+        String path = requestLineParts[1];
+        String version = requestLineParts[2];
+
+        Map<String, String> headers = new HashMap<>();
+        for (int i = 1; i < lines.length; i++) {
+            String[] headerParts = lines[i].split(": ", 2);
+            if (headerParts.length == 2) {
+                headers.put(headerParts[0], headerParts[1]);
+            }
+        }
+
+        return new HttpRequest(method, path, version, headers, bodyPart);
     }
 
     public HttpMethod getMethod() {
