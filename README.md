@@ -46,9 +46,9 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
     * [x] HttpRequest / HttpResponse 클래스 설계
     * [x] 단위 테스트 작성
 
-* [ ] RequestHandler 구현
-    * [ ] InputStream → HttpRequest
-    * [ ] HttpResponse → OutputStream
+* [x] RequestHandler 구현
+    * [x] InputStream → HttpRequest
+    * [x] HttpResponse → OutputStream
     * [ ] 기본 요청 흐름 통합 테스트
 
 * [ ] Servlet / ServletContainer
