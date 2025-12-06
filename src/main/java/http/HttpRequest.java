@@ -31,8 +31,22 @@ public class HttpRequest {
         String requestLine = lines[0];
         String[] requestLineParts = requestLine.split(" ");
         HttpMethod method = HttpMethod.valueOf(requestLineParts[0]);
-        String path = requestLineParts[1];
         String version = requestLineParts[2];
+        String path = requestLineParts[1];
+
+        Map<String, String> queryParams = new HashMap<>();
+        String[] pathParts = path.split("\\?", 2);
+        if (pathParts.length == 2) {
+            path = pathParts[0];
+            String queryString = pathParts[1];
+            String[] pairs = queryString.split("&");
+            for (String pair : pairs) {
+                String[] keyValue = pair.split("=", 2);
+                if (keyValue.length == 2) {
+                    queryParams.put(keyValue[0], keyValue[1]);
+                }
+            }
+        }
 
         Map<String, String> headers = new HashMap<>();
         for (int i = 1; i < lines.length; i++) {
@@ -41,9 +55,6 @@ public class HttpRequest {
                 headers.put(headerParts[0], headerParts[1]);
             }
         }
-
-        Map<String, String> queryParams = new HashMap<>();
-        // TODO: 쿼리 파라미터 파싱 로직 추가
 
         return new HttpRequest(method, path, version, queryParams, headers, bodyPart);
     }
