@@ -60,18 +60,14 @@ public class HttpResponse {
     }
 
     public byte[] getBytes() {
-        String response = """
-                %s %d %s\r
-                %s%s\r
-                """
-                .formatted(
-                        version, status.getCode(), status.getMessage(),
-                        headers.entrySet().stream()
-                                .map(entry -> entry.getKey() + ": " + entry.getValue())
-                                .reduce("", (acc, header) -> acc + header + "\r\n"),
-                        body != null ? body : ""
-                );
-        return response.getBytes();
+        String statusLine = "%s %d %s\r\n".formatted(version, status.getCode(), status.getMessage());
+        String headersString = headers.entrySet().stream()
+                .map(entry -> entry.getKey() + ": " + entry.getValue() + "\r\n")
+                .reduce("", String::concat);
+        String bodyString = body != null ? body : "";
+
+        String separator = headers.isEmpty() ? "" : "\r\n";
+        return (statusLine + headersString + separator + bodyString).getBytes();
     }
 
 }
