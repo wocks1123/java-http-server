@@ -1,10 +1,10 @@
 package server;
 
-import http.HttpRequest;
-import http.HttpResponse;
 import http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import servlet.ServletContainer;
+import servlet.ServletHttpHandler;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,18 +39,15 @@ public class HttpServer {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream()
         ) {
-            RequestHandler requestHandler = new RequestHandler(new SimpleHttpHandler());
+            ServletContainer servletContainer = new ServletContainer();
+            servletContainer.registerServlet("/hello", (request, response) -> {
+                response.setStatus(HttpStatus.OK);
+                response.setBody("Hello, World!\r\n");
+            });
+            RequestHandler requestHandler = new RequestHandler(new ServletHttpHandler(servletContainer));
             requestHandler.handle(inputStream, outputStream);
         } catch (IOException e) {
             log.error("Error handling client request:", e);
-        }
-    }
-
-    static class SimpleHttpHandler implements HttpHandler {
-        @Override
-        public void handle(HttpRequest request, HttpResponse response) {
-            response.setStatus(HttpStatus.OK);
-            response.setBody("Hello World\r\n");
         }
     }
 
