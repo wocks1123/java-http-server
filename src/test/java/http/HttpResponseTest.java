@@ -75,14 +75,14 @@ class HttpResponseTest {
     void createResponseWithBody() {
         // given
         final HttpResponse response = new HttpResponse();
-        final String bodyContent = "Hello, World!";
+        final byte[] bodyContent = "Hello, World!".getBytes();
 
         // when
         response.setBody(bodyContent);
 
         // then
         assertEquals(bodyContent, response.getBody());
-        assertEquals(bodyContent.length(), Integer.parseInt(response.getHeaders().get("Content-Length")));
+        assertEquals(bodyContent.length, Integer.parseInt(response.getHeaders().get("Content-Length")));
     }
 
     @Test
