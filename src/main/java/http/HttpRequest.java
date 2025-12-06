@@ -1,5 +1,6 @@
 package http;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -23,39 +24,22 @@ public class HttpRequest {
     }
 
     public static HttpRequest parse(byte[] rawRequest) {
-        String requestString = new String(rawRequest);
+        String requestString = new String(rawRequest, StandardCharsets.UTF_8);
+
         String[] requestParts = requestString.split("\r\n\r\n", 2);
         String headerPart = requestParts[0];
         String bodyPart = requestParts.length > 1 ? requestParts[1] : "";
 
-        String[] lines = headerPart.split("\r\n");
-        String requestLine = lines[0];
-        String[] requestLineParts = requestLine.split(" ");
+        String[] headerLines = headerPart.split("\r\n");
+        String[] requestLineParts = headerLines[0].split(" ");
         HttpMethod method = HttpMethod.valueOf(requestLineParts[0]);
         String version = requestLineParts[2];
-        String path = requestLineParts[1];
 
-        Map<String, String> queryParams = new HashMap<>();
-        String[] pathParts = path.split("\\?", 2);
-        if (pathParts.length == 2) {
-            path = pathParts[0];
-            String queryString = pathParts[1];
-            String[] pairs = queryString.split("&");
-            for (String pair : pairs) {
-                String[] keyValue = pair.split("=", 2);
-                if (keyValue.length == 2) {
-                    queryParams.put(keyValue[0], keyValue[1]);
-                }
-            }
-        }
+        String fullPath = requestParts[0].split(" ")[1];
+        String path = extractPath(fullPath);
+        Map<String, String> queryParams = extractQueryParams(fullPath);
 
-        Map<String, String> headers = new HashMap<>();
-        for (int i = 1; i < lines.length; i++) {
-            String[] headerParts = lines[i].split(": ", 2);
-            if (headerParts.length == 2) {
-                headers.put(headerParts[0], headerParts[1]);
-            }
-        }
+        Map<String, String> headers = parseHeaders(headerLines);
 
         int contentLength = headers.containsKey("Content-Length") ? Integer.parseInt(headers.get("Content-Length")) : 0;
         if (contentLength > 0 && bodyPart.length() > contentLength) {
@@ -63,6 +47,40 @@ public class HttpRequest {
         }
 
         return new HttpRequest(method, path, version, queryParams, headers, bodyPart);
+    }
+
+    private static String extractPath(String fullPath) {
+        int queryIndex = fullPath.indexOf("?");
+        return queryIndex != -1 ? fullPath.substring(0, queryIndex) : fullPath;
+    }
+
+    private static Map<String, String> extractQueryParams(String fullPath) {
+        String[] pathParts = fullPath.split("\\?", 2);
+        if (pathParts.length < 2) {
+            return Map.of();
+        }
+
+        Map<String, String> queryParamMap = new HashMap<>();
+        String[] pairs = pathParts[1].split("&");
+        for (String pair : pairs) {
+            String[] keyValue = pair.split("=", 2);
+            if (keyValue.length == 2) {
+                queryParamMap.put(keyValue[0], keyValue[1]);
+            }
+        }
+        return queryParamMap;
+    }
+
+    private static Map<String, String> parseHeaders(String[] headerLines) {
+        Map<String, String> headerMap = new HashMap<>();
+        for (int i = 1; i < headerLines.length; i++) {
+            String line = headerLines[i];
+            String[] keyValue = line.split(":", 2);
+            if (keyValue.length == 2) {
+                headerMap.put(keyValue[0].trim(), keyValue[1].trim());
+            }
+        }
+        return headerMap;
     }
 
     public HttpMethod getMethod() {
