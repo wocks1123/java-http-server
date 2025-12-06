@@ -268,4 +268,44 @@ class HttpRequestTest {
         );
     }
 
+    @Test
+    @DisplayName("생성자에 queryParams가 null이면 빈 Map으로 초기화")
+    void constructorWithNullQueryParams() {
+        // given & when
+        final HttpRequest httpRequest = new HttpRequest(
+                HttpMethod.GET,
+                "/test",
+                "HTTP/1.1",
+                null,  // null queryParams
+                Map.of(),
+                ""
+        );
+
+        // then
+        assertAll("Null queryParams handling",
+                () -> assertNotNull(httpRequest.getQueryParams()),
+                () -> assertEquals(0, httpRequest.getQueryParams().size())
+        );
+    }
+
+    @Test
+    @DisplayName("생성자에 headers가 null이면 빈 Map으로 초기화")
+    void constructorWithNullHeaders() {
+        // given & when
+        final HttpRequest httpRequest = new HttpRequest(
+                HttpMethod.GET,
+                "/test",
+                "HTTP/1.1",
+                Map.of(),
+                null,  // null headers
+                ""
+        );
+
+        // then
+        assertAll("Null headers handling",
+                () -> assertNotNull(httpRequest.getHeaders()),
+                () -> assertEquals(0, httpRequest.getHeaders().size())
+        );
+    }
+
 }
