@@ -63,4 +63,41 @@ class HttpRequestTest {
         );
     }
 
+    @Test
+    @DisplayName("쿼리 스트링이 포함된 GET 요청을 HttpRequest 객체로 변환")
+    void parseGetRequestWithQueryString() {
+        // given
+        final byte[] rawRequest = ("""
+                GET /search?q=chicken&lang=ko HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """)
+                .getBytes();
+
+        // when
+        final HttpRequest httpRequest = HttpRequest.parse(rawRequest);
+
+        // then
+        assertAll("HTTP Request Line",
+                () -> assertEquals(HttpMethod.GET, httpRequest.getMethod()),
+                () -> assertEquals("HTTP/1.1", httpRequest.getVersion()),
+                () -> assertEquals("/search", httpRequest.getPath()),
+                () -> {
+                    Map<String, String> queryParams = httpRequest.getQueryParams();
+                    assertAll("Query Parameters",
+                            () -> assertEquals(2, queryParams.size()),
+                            () -> assertEquals("chicken", queryParams.get("q")),
+                            () -> assertEquals("ko", queryParams.get("lang"))
+                    );
+                },
+                () -> {
+                    Map<String, String> headers = httpRequest.getHeaders();
+                    assertAll("Headers",
+                            () -> assertEquals(1, headers.size()),
+                            () -> assertEquals("localhost:8080", headers.get("Host"))
+                    );
+                }
+        );
+    }
+
 }

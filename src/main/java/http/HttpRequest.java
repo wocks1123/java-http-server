@@ -8,13 +8,15 @@ public class HttpRequest {
     private final HttpMethod method;
     private final String path;
     private final String version;
+    private final Map<String, String> queryParams;
     private final Map<String, String> headers;
     private final String body;
 
-    public HttpRequest(HttpMethod method, String path, String version, Map<String, String> headers, String body) {
+    public HttpRequest(HttpMethod method, String path, String version, Map<String, String> queryParams, Map<String, String> headers, String body) {
         this.method = method;
         this.path = path;
         this.version = version;
+        this.queryParams = queryParams;
         this.headers = headers;
         this.body = body;
     }
@@ -40,7 +42,10 @@ public class HttpRequest {
             }
         }
 
-        return new HttpRequest(method, path, version, headers, bodyPart);
+        Map<String, String> queryParams = new HashMap<>();
+        // TODO: 쿼리 파라미터 파싱 로직 추가
+
+        return new HttpRequest(method, path, version, queryParams, headers, bodyPart);
     }
 
     public HttpMethod getMethod() {
@@ -63,4 +68,7 @@ public class HttpRequest {
         return body;
     }
 
+    public Map<String, String> getQueryParams() {
+        return queryParams;
+    }
 }
