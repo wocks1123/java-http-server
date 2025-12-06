@@ -51,11 +51,11 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
     * [x] HttpResponse → OutputStream
     * [ ] 기본 요청 흐름 통합 테스트
 
-* [ ] Servlet / ServletContainer
-    * [ ] Servlet 인터페이스 정의
-    * [ ] URL → Servlet 매핑
-    * [ ] StaticResourceServlet 구현
-    * [ ] 컨테이너와 서블릿 책임 분리
+* [x] Servlet / ServletContainer
+    * [x] Servlet 인터페이스 정의
+    * [x] URL → Servlet 매핑
+    * [x] StaticResourceServlet 구현
+    * [x] 컨테이너와 서블릿 책임 분리
 
 * [ ] FrontController & 라우팅
     * [ ] Controller 인터페이스 정의
