@@ -1,5 +1,6 @@
 package servlet;
 
+import fixture.HttpRequestFixture;
 import http.HttpMethod;
 import http.HttpRequest;
 import http.HttpResponse;
@@ -28,14 +29,10 @@ class ServletHttpHandlerTest {
     @DisplayName("매핑한 path에 해당하는 Servlet이 호출된다.")
     void testServletHttpHandlerInvokesMappedServlet() {
         // given
-        final HttpRequest request = new HttpRequest(
-                HttpMethod.GET,
-                mappedPath,
-                "HTTP/1.1",
-                null,
-                null,
-                null
-        );
+        final HttpRequest request = HttpRequestFixture.builder()
+                .method(HttpMethod.GET)
+                .path(mappedPath)
+                .build();
         final HttpResponse response = new HttpResponse();
 
         // when
@@ -52,14 +49,10 @@ class ServletHttpHandlerTest {
     @DisplayName("매핑되지 않은 path로 요청이 오면 404 응답을 반환한다.")
     void testServletHttpHandlerReturns404ForUnmappedPath() {
         // given
-        final HttpRequest request = new HttpRequest(
-                HttpMethod.GET,
-                "/unmapped",
-                "HTTP/1.1",
-                null,
-                null,
-                null
-        );
+        final HttpRequest request = HttpRequestFixture.builder()
+                .method(HttpMethod.GET)
+                .path("/unmapped")
+                .build();
         final HttpResponse response = new HttpResponse();
 
         // when
