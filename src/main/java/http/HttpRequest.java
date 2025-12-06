@@ -16,8 +16,8 @@ public class HttpRequest {
         this.method = method;
         this.path = path;
         this.version = version;
-        this.queryParams = queryParams;
-        this.headers = headers;
+        this.queryParams = queryParams != null ? Map.copyOf(queryParams) : Map.of();
+        this.headers = headers != null ? Map.copyOf(headers) : Map.of();
         this.body = body;
     }
 
