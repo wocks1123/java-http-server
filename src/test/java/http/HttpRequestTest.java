@@ -42,4 +42,25 @@ class HttpRequestTest {
         );
     }
 
+    @Test
+    @DisplayName("단순 GET 요청을 HttpRequest 객체로 변환")
+    void parseSimpleGetRequest() {
+        // given
+        final byte[] rawRequest = ("""
+                GET / HTTP/1.1\r
+                """)
+                .getBytes();
+
+        // when
+        final HttpRequest httpRequest = HttpRequest.parse(rawRequest);
+
+        // then
+        assertAll("HTTP Request Line",
+                () -> assertEquals(HttpMethod.GET, httpRequest.getMethod()),
+                () -> assertEquals("/", httpRequest.getPath()),
+                () -> assertEquals("HTTP/1.1", httpRequest.getVersion()),
+                () -> assertEquals(0, httpRequest.getHeaders().size())
+        );
+    }
+
 }
