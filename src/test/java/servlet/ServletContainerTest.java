@@ -131,6 +131,45 @@ class ServletContainerTest {
         assertEquals(childServlet, foundServlet);
     }
 
+    @Test
+    @DisplayName("`/` 경로에 대한 서블릿이 정확히 매칭된다")
+    void testRootPathServletMatching() {
+        // given
+        final ServletContainer servletContainer = new ServletContainer();
+        final String rootPath = "/";
+        final Servlet rootServlet = new DummyServlet();
+
+        // when
+        servletContainer.registerServlet(rootPath, rootServlet);
+        final Servlet foundServlet = servletContainer.resolveServlet("/");
+
+        // then
+        assertEquals(rootServlet, foundServlet);
+    }
+
+    @Test
+    @DisplayName("`/` 경로에 대한 서블릿이 다른 경로와 혼동되지 않는다")
+    void testRootPathServletDoesNotMatchOtherPaths() {
+        // given
+        final ServletContainer servletContainer = new ServletContainer();
+        final String rootPath = "/";
+        final Servlet rootServlet = new DummyServlet();
+        final String otherPath = "/other";
+        final Servlet otherServlet = new DummyServlet();
+        final String wildcardPath = "/*";
+        final Servlet wildcardServlet = new DummyServlet();
+
+        // when
+        servletContainer.registerServlet(rootPath, rootServlet);
+        servletContainer.registerServlet(otherPath, otherServlet);
+        servletContainer.registerServlet(wildcardPath, wildcardServlet);
+
+        // then
+        assertEquals(otherServlet, servletContainer.resolveServlet(otherPath));
+        assertEquals(rootServlet, servletContainer.resolveServlet("/"));
+        assertEquals(wildcardServlet, servletContainer.resolveServlet("/something-else"));
+    }
+
     private static class DummyServlet implements Servlet {
         @Override
         public void service(HttpRequest request, HttpResponse response) {
