@@ -7,6 +7,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 
 class HttpRequestTest {
@@ -60,6 +62,37 @@ class HttpRequestTest {
                 () -> assertEquals("/", httpRequest.getPath()),
                 () -> assertEquals("HTTP/1.1", httpRequest.getVersion()),
                 () -> assertEquals(0, httpRequest.getHeaders().size())
+        );
+    }
+
+    @Test
+    @DisplayName("잘못된 형식의 헤더는 무시")
+    void parseRequestWithMalformedHeaders() {
+        // given
+        final byte[] rawRequest = ("""
+                GET / HTTP/1.1\r
+                Valid-Header: value1\r
+                InvalidHeader\r
+                Another-Valid: value2\r
+                \r
+                """)
+                .getBytes();
+
+        // when
+        final HttpRequest httpRequest = HttpRequest.parse(rawRequest);
+
+        // then
+        assertAll("Malformed headers handling",
+                () -> assertEquals(HttpMethod.GET, httpRequest.getMethod()),
+                () -> assertEquals("HTTP/1.1", httpRequest.getVersion()),
+                () -> {
+                    Map<String, String> headers = httpRequest.getHeaders();
+                    assertAll("Headers",
+                            () -> assertEquals(2, headers.size()),
+                            () -> assertEquals("value1", headers.get("Valid-Header")),
+                            () -> assertEquals("value2", headers.get("Another-Valid"))
+                    );
+                }
         );
     }
 
