@@ -101,6 +101,42 @@ class HttpRequestTest {
     }
 
     @Test
+    @DisplayName("잘못된 형식의 쿼리 파라미터는 무시")
+    void parseRequestWithMalformedQueryParams() {
+        // given
+        final byte[] rawRequest = ("""
+                GET /search?q=chicken&invalid&lang=ko HTTP/1.1\r
+                Host: localhost:8080\r
+                \r
+                """)
+                .getBytes();
+
+        // when
+        final HttpRequest httpRequest = HttpRequest.parse(rawRequest);
+
+        // then
+        assertAll("Malformed query params handling",
+                () -> assertEquals("/search", httpRequest.getPath()),
+                () -> {
+                    Map<String, String> queryParams = httpRequest.getQueryParams();
+                    assertAll("Query Parameters",
+                            () -> assertEquals(2, queryParams.size()),
+                            () -> assertEquals("chicken", queryParams.get("q")),
+                            () -> assertEquals("ko", queryParams.get("lang")),
+                            () -> assertNull(httpRequest.getQueryParams().get("invalid"))
+                    );
+                },
+                () -> {
+                    Map<String, String> headers = httpRequest.getHeaders();
+                    assertAll("Headers",
+                            () -> assertEquals(1, headers.size()),
+                            () -> assertEquals("localhost:8080", headers.get("Host"))
+                    );
+                }
+        );
+    }
+
+    @Test
     @DisplayName("POST 요청을 HttpRequest 객체로 변환")
     void parsePostRequest() {
         // given
