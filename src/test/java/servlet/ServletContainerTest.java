@@ -112,6 +112,25 @@ class ServletContainerTest {
         assertEquals(servlet, servletContainer.resolveServlet("/"));
     }
 
+    @Test
+    @DisplayName("하위 와일드 카드 패턴이 상위 와일드카드 패턴보다 우선한다")
+    void testSubWildcardPatternHasPriorityOverParentWildcard() {
+        // given
+        final ServletContainer servletContainer = new ServletContainer();
+        final String parentWildcardPath = "/api/*";
+        final String childWildcardPath = "/api/v1/*";
+        final Servlet parentServlet = new DummyServlet();
+        final Servlet childServlet = new DummyServlet();
+
+        // when
+        servletContainer.registerServlet(parentWildcardPath, parentServlet);
+        servletContainer.registerServlet(childWildcardPath, childServlet);
+        final Servlet foundServlet = servletContainer.resolveServlet("/api/v1/resource");
+
+        // then
+        assertEquals(childServlet, foundServlet);
+    }
+
     private static class DummyServlet implements Servlet {
         @Override
         public void service(HttpRequest request, HttpResponse response) {
