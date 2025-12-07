@@ -48,4 +48,8 @@ public class Todo {
         this.id = id;
     }
 
+    public String toString() {
+        return "{\"id\":\"" + getIdValue() + "\", \"title\":\"" + title + "\", \"completed\":" + completed + "}";
+    }
+
 }
