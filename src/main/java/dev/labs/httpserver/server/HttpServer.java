@@ -3,6 +3,7 @@ package dev.labs.httpserver.server;
 import dev.labs.httpserver.app.todo.InMemoryTodoRepository;
 import dev.labs.httpserver.app.todo.TodoServlet;
 import dev.labs.httpserver.http.HttpStatus;
+import dev.labs.httpserver.servlet.Servlet;
 import dev.labs.httpserver.servlet.ServletContainer;
 import dev.labs.httpserver.servlet.ServletHttpHandler;
 import dev.labs.httpserver.servlet.StaticResourceServlet;
@@ -31,7 +32,9 @@ public class HttpServer {
             response.setBody("Hello, World!\r\n");
         });
         servletContainer.registerServlet("/static/*", new StaticResourceServlet());
-        servletContainer.registerServlet("/todos/*", new TodoServlet(new InMemoryTodoRepository()));
+        Servlet todoServlet = new TodoServlet(new InMemoryTodoRepository());
+        servletContainer.registerServlet("/todos/*", todoServlet);
+        servletContainer.registerServlet("/todos", todoServlet);
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             while (true) {
