@@ -36,6 +36,8 @@ public class RequestHandler {
             httpHandler.handle(request, response);
             outputStream.write(response.toBytes());
             outputStream.flush();
+            log.debug("request from client \n{}", request);
+            log.debug("response to client \n{}", response);
         } catch (Exception e) {
             log.error("Exception while handling request:", e);
         }
