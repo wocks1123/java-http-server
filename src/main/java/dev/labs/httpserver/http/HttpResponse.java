@@ -68,6 +68,9 @@ public class HttpResponse {
 
         response.append(String.format("%s %d %s\r\n", version, status.getCode(), status.getMessage()));
 
+        headers.put("Content-Length", body == null ? "0" : Integer.toString(body.length));
+        headers.put("Connection", "close");
+
         headers.forEach((key, value) ->
                 response.append(key).append(": ").append(value).append("\r\n")
         );
@@ -85,6 +88,10 @@ public class HttpResponse {
         System.arraycopy(headerBytes, 0, result, 0, headerBytes.length);
         System.arraycopy(body, 0, result, headerBytes.length, body.length);
         return result;
+    }
+
+    public String toString() {
+        return new String(toBytes());
     }
 
 }
