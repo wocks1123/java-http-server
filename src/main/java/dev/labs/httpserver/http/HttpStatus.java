@@ -1,4 +1,4 @@
-package http;
+package dev.labs.httpserver.http;
 
 public enum HttpStatus {
     OK(200, "OK"),

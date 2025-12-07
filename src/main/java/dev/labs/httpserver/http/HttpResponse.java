@@ -1,4 +1,4 @@
-package http;
+package dev.labs.httpserver.http;
 
 import java.util.HashMap;
 import java.util.Map;

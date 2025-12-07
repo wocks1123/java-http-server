@@ -1,7 +1,7 @@
-package fixture;
+package dev.labs.httpserver.fixture;
 
-import http.HttpMethod;
-import http.HttpRequest;
+import dev.labs.httpserver.http.HttpMethod;
+import dev.labs.httpserver.http.HttpRequest;
 
 import java.util.HashMap;
 import java.util.Map;

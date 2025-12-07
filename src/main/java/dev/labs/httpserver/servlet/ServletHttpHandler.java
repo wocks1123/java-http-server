@@ -1,9 +1,9 @@
-package servlet;
+package dev.labs.httpserver.servlet;
 
-import http.HttpRequest;
-import http.HttpResponse;
-import http.HttpStatus;
-import server.HttpHandler;
+import dev.labs.httpserver.http.HttpRequest;
+import dev.labs.httpserver.http.HttpResponse;
+import dev.labs.httpserver.http.HttpStatus;
+import dev.labs.httpserver.server.HttpHandler;
 
 public class ServletHttpHandler implements HttpHandler {
 

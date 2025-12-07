@@ -3,7 +3,7 @@ plugins {
     application
 }
 
-group = "webserver"
+group = "dev.labs.httpserver"
 version = "1.0-SNAPSHOT"
 
 java {
@@ -29,7 +29,7 @@ tasks.test {
 }
 
 application {
-    mainClass.set("webserver.WebServer")
+    mainClass.set("dev.labs.WebServer")
 }
 
 tasks.withType<JavaCompile> {

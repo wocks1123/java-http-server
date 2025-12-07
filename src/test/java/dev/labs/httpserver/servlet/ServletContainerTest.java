@@ -1,7 +1,7 @@
-package servlet;
+package dev.labs.httpserver.servlet;
 
-import http.HttpRequest;
-import http.HttpResponse;
+import dev.labs.httpserver.http.HttpRequest;
+import dev.labs.httpserver.http.HttpResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

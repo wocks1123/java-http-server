@@ -1,11 +1,11 @@
-package server;
+package dev.labs.httpserver.server;
 
-import http.HttpStatus;
+import dev.labs.httpserver.http.HttpStatus;
+import dev.labs.httpserver.servlet.ServletContainer;
+import dev.labs.httpserver.servlet.ServletHttpHandler;
+import dev.labs.httpserver.servlet.StaticResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import servlet.ServletContainer;
-import servlet.ServletHttpHandler;
-import servlet.StaticResourceServlet;
 
 import java.io.IOException;
 import java.io.InputStream;

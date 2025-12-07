@@ -1,4 +1,4 @@
-package servlet;
+package dev.labs.httpserver.servlet;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,10 +1,10 @@
-package servlet;
+package dev.labs.httpserver.servlet;
 
-import fixture.HttpRequestFixture;
-import http.HttpMethod;
-import http.HttpRequest;
-import http.HttpResponse;
-import http.HttpStatus;
+import dev.labs.httpserver.fixture.HttpRequestFixture;
+import dev.labs.httpserver.http.HttpMethod;
+import dev.labs.httpserver.http.HttpRequest;
+import dev.labs.httpserver.http.HttpResponse;
+import dev.labs.httpserver.http.HttpStatus;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

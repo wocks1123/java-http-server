@@ -1,8 +1,8 @@
-package servlet;
+package dev.labs.httpserver.servlet;
 
-import http.HttpRequest;
-import http.HttpResponse;
-import http.HttpStatus;
+import dev.labs.httpserver.http.HttpRequest;
+import dev.labs.httpserver.http.HttpResponse;
+import dev.labs.httpserver.http.HttpStatus;
 
 import java.io.IOException;
 import java.io.InputStream;

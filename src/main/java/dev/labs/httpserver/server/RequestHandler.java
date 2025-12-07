@@ -1,7 +1,7 @@
-package server;
+package dev.labs.httpserver.server;
 
-import http.HttpRequest;
-import http.HttpResponse;
+import dev.labs.httpserver.http.HttpRequest;
+import dev.labs.httpserver.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
