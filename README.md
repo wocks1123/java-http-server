@@ -74,8 +74,8 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
     * [ ] 공유 저장소 동시성 고려
     * [ ] thread-safe 자료구조 도입
 
-* [ ] TODO LIST 기능 (간단 버전)
-    * [ ] Todo / TodoRepository
-    * [ ] TODO 목록 조회 (GET)
-    * [ ] TODO 추가 (POST)
+* [x] TODO LIST 기능 (간단 버전)
+    * [x] Todo / TodoRepository
+    * [x] TODO 목록 조회 (GET)
+    * [x] TODO 추가 (POST)
     * [ ] 사용자별 TODO 관리
