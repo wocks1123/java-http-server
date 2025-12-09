@@ -1,12 +1,7 @@
 package dev.labs.httpserver.server;
 
-import dev.labs.httpserver.app.todo.InMemoryTodoRepository;
-import dev.labs.httpserver.app.todo.TodoServlet;
-import dev.labs.httpserver.http.HttpStatus;
-import dev.labs.httpserver.servlet.Servlet;
 import dev.labs.httpserver.servlet.ServletContainer;
 import dev.labs.httpserver.servlet.ServletHttpHandler;
-import dev.labs.httpserver.servlet.StaticResourceServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,32 +15,50 @@ public class HttpServer {
 
     private static final Logger log = LoggerFactory.getLogger(HttpServer.class);
 
-    private static final int PORT = 8080;
+    private final int port;
+    private final ServletContainer servletContainer;
 
+    private volatile boolean running = false;
+    private ServerSocket serverSocket;
 
-    public static void main(String[] args) {
-        log.info("WebServer started on port " + PORT);
+    public HttpServer(int port, ServletContainer servletContainer) {
+        this.port = port;
+        this.servletContainer = servletContainer;
+    }
 
-        ServletContainer servletContainer = new ServletContainer();
-        servletContainer.registerServlet("/*", (request, response) -> {
-            response.setStatus(HttpStatus.OK);
-            response.setBody("Hello, World!\r\n");
-        });
-        servletContainer.registerServlet("/static/*", new StaticResourceServlet());
-        Servlet todoServlet = new TodoServlet(new InMemoryTodoRepository());
-        servletContainer.registerServlet("/todos/*", todoServlet);
-        servletContainer.registerServlet("/todos", todoServlet);
+    public void start() {
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            this.serverSocket = serverSocket;
+            running = true;
+            log.info("HttpServer started on port {}", serverSocket.getLocalPort());
 
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            while (true) {
+            while (running) {
                 Socket clientSocket = serverSocket.accept();
                 log.info("Client connected: {}", clientSocket.getInetAddress());
-
                 handleRequest(clientSocket, servletContainer);
             }
-        } catch (Exception e) {
-            log.error("Server error:", e);
+        } catch (IOException e) {
+            if (running) {
+                log.error("Server error:", e);
+            }
+        } finally {
+            running = false;
         }
+    }
+
+    public void stop() {
+        running = false;
+        if (serverSocket != null && !serverSocket.isClosed()) {
+            try {
+                serverSocket.close();
+            } catch (IOException e) {
+                log.warn("Error closing server socket", e);
+            }
+        }
+    }
+
+    public int getPort() {
+        return serverSocket != null ? serverSocket.getLocalPort() : port;
     }
 
     private static void handleRequest(Socket socket, ServletContainer servletContainer) {
@@ -59,5 +72,4 @@ public class HttpServer {
             log.error("Error handling client request:", e);
         }
     }
-
 }
