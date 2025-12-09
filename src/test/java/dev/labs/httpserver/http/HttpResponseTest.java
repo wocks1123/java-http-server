@@ -6,10 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class HttpResponseTest {
 
@@ -75,13 +72,13 @@ class HttpResponseTest {
     void createResponseWithBody() {
         // given
         final HttpResponse response = new HttpResponse();
-        final byte[] bodyContent = "Hello, World!".getBytes();
+        final byte[] bodyContent = "Hello, World!".getBytes(StandardCharsets.UTF_8);
 
         // when
         response.setBody(bodyContent);
 
         // then
-        assertEquals(bodyContent, response.getBody());
+        assertArrayEquals(bodyContent, response.getBody());
         assertEquals(bodyContent.length, Integer.parseInt(response.getHeaders().get("Content-Length")));
     }
 
@@ -107,10 +104,11 @@ class HttpResponseTest {
         response.setStatus(HttpStatus.BAD_REQUEST);
 
         // when
-        String statusLine = new String(response.toBytes(), StandardCharsets.UTF_8);
+        final String rawResponse = new String(response.toBytes(), StandardCharsets.UTF_8);
 
         // then
-        assertEquals("HTTP/1.1 400 Bad Request\r\n", statusLine);
+        final String firstLine = rawResponse.split("\r\n")[0];
+        assertEquals("HTTP/1.1 400 Bad Request", firstLine);
     }
 
     @Test
@@ -122,10 +120,16 @@ class HttpResponseTest {
         response.addHeader("Content-Type", "text/plain");
 
         // when
-        String headersString = new String(response.toBytes(), StandardCharsets.UTF_8);
+        final String fullResponse = new String(response.toBytes(), StandardCharsets.UTF_8);
 
         // then
-        assertEquals("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n", headersString);
+        final String firstLine = fullResponse.split("\r\n")[0];
+        assertEquals("HTTP/1.1 200 OK", firstLine);
+
+        String headers = fullResponse.split("\r\n\r\n", 2)[0];
+        assertTrue(headers.contains("Content-Type: text/plain"));
+        assertTrue(headers.contains("Connection: close"));
+        assertTrue(headers.contains("Content-Length: 0"));
     }
 
     @Test

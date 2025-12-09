@@ -16,6 +16,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RequestHandlerTest {
 
@@ -75,7 +76,13 @@ class RequestHandlerTest {
 
         // then
         final String rawResponse = outputStream.toString(StandardCharsets.UTF_8);
-        assertEquals("HTTP/1.1 200 OK\r\n", rawResponse);
+        final String[] parts = rawResponse.split("\r\n\r\n", 2);
+        final String headers = parts[0];
+        final String body = parts.length > 1 ? parts[1] : "";
+        assertTrue(headers.contains("HTTP/1.1 200 OK"));
+        assertTrue(headers.contains("Content-Length:"));
+        assertTrue(headers.contains("Connection: close"));
+        assertTrue(body.isEmpty());
     }
 
     @Test
