@@ -1,13 +1,14 @@
 package dev.labs.httpserver.http;
 
-import java.util.HashMap;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class HttpResponse {
 
     private String version = "HTTP/1.1";
     private HttpStatus status;
-    private final Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new LinkedHashMap<>();
     private byte[] body;
 
 
@@ -16,6 +17,9 @@ public class HttpResponse {
     }
 
     public int getStatusCode() {
+        if (status == null) {
+            throw new IllegalStateException("Status is not set");
+        }
         return status.getCode();
     }
 
@@ -24,15 +28,18 @@ public class HttpResponse {
     }
 
     public String getStatusMessage() {
+        if (status == null) {
+            throw new IllegalStateException("Status is not set");
+        }
         return status.getMessage();
     }
 
     public Map<String, String> getHeaders() {
-        return headers;
+        return Map.copyOf(headers);
     }
 
     public byte[] getBody() {
-        return body;
+        return body == null ? null : body.clone();
     }
 
     public void setVersion(String version) {
@@ -49,14 +56,16 @@ public class HttpResponse {
 
     public void setBody(byte[] bodyBytes) {
         if (bodyBytes == null) {
+            this.body = null;
+            this.headers.remove("Content-Length");
             return;
         }
-        this.headers.put("Content-Length", Integer.toString(bodyBytes.length));
-        this.body = bodyBytes;
+        this.body = bodyBytes.clone();
+        this.headers.put("Content-Length", Integer.toString(this.body.length));
     }
 
     public void setBody(String body) {
-        setBody(body.getBytes());
+        setBody(body == null ? null : body.getBytes(StandardCharsets.UTF_8));
     }
 
     public void addHeader(String name, String value) {
@@ -66,24 +75,29 @@ public class HttpResponse {
     public byte[] toBytes() {
         StringBuilder response = new StringBuilder();
 
+        if (status == null) {
+            throw new IllegalStateException("Status is not set");
+        }
+
         response.append(String.format("%s %d %s\r\n", version, status.getCode(), status.getMessage()));
 
-        headers.put("Content-Length", body == null ? "0" : Integer.toString(body.length));
-        headers.put("Connection", "close");
+        Map<String, String> tempHeaders = new LinkedHashMap<>(headers);
+        tempHeaders.put("Content-Length", body == null ? "0" : Integer.toString(body.length));
+        tempHeaders.put("Connection", "close");
 
-        headers.forEach((key, value) ->
+        tempHeaders.forEach((key, value) ->
                 response.append(key).append(": ").append(value).append("\r\n")
         );
 
-        if (!headers.isEmpty()) {
+        if (!tempHeaders.isEmpty()) {
             response.append("\r\n");
         }
 
         if (body == null) {
-            return response.toString().getBytes();
+            return response.toString().getBytes(StandardCharsets.UTF_8);
         }
 
-        byte[] headerBytes = response.toString().getBytes();
+        byte[] headerBytes = response.toString().getBytes(StandardCharsets.UTF_8);
         byte[] result = new byte[headerBytes.length + body.length];
         System.arraycopy(headerBytes, 0, result, 0, headerBytes.length);
         System.arraycopy(body, 0, result, headerBytes.length, body.length);
@@ -91,7 +105,7 @@ public class HttpResponse {
     }
 
     public String toString() {
-        return new String(toBytes());
+        return new String(toBytes(), StandardCharsets.UTF_8);
     }
 
 }
