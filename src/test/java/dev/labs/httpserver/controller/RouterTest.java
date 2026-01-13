@@ -7,8 +7,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 class RouterTest {
@@ -30,20 +33,21 @@ class RouterTest {
         sut.addRoute(method, path, controller);
 
         // when
-        final Controller foundController = sut.findController(method, path);
+        final Router.MatchResult result = sut.findController(method, path);
 
         // then
-        assertEquals(foundController, controller);
+        assertNotNull(result);
+        assertEquals(controller, result.controller());
     }
 
     @Test
     @DisplayName("등록되지 않은 라우트를 찾으면 null을 반환한다")
     void testFindUnregisteredRoute() {
         // when
-        Controller found = sut.findController(HttpMethod.GET, "/not-exist");
+        final Router.MatchResult result = sut.findController(HttpMethod.GET, "/not-exist");
 
         // then
-        assertNull(found);
+        assertNull(result);
     }
 
     @Test
@@ -57,13 +61,15 @@ class RouterTest {
         sut.addRoute(HttpMethod.POST, path, postController);
 
         // when
-        final Controller foundGetController = sut.findController(HttpMethod.GET, path);
-        final Controller foundPostController = sut.findController(HttpMethod.POST, path);
+        final Router.MatchResult getResult = sut.findController(HttpMethod.GET, path);
+        final Router.MatchResult postResult = sut.findController(HttpMethod.POST, path);
 
         // then
-        assertEquals(getController, foundGetController);
-        assertEquals(postController, foundPostController);
-        assertNotEquals(getController, postController);
+        assertNotNull(getResult);
+        assertNotNull(postResult);
+        assertEquals(getController, getResult.controller());
+        assertEquals(postController, postResult.controller());
+        assertNotEquals(getResult.controller(), postResult.controller());
     }
 
     @Test
@@ -78,9 +84,75 @@ class RouterTest {
         sut.addRoute(HttpMethod.PUT, "/path3", controller3);
 
         // when & then
-        assertEquals(controller1, sut.findController(HttpMethod.GET, "/path1"));
-        assertEquals(controller2, sut.findController(HttpMethod.POST, "/path2"));
-        assertEquals(controller3, sut.findController(HttpMethod.PUT, "/path3"));
+        assertEquals(controller1, sut.findController(HttpMethod.GET, "/path1").controller());
+        assertEquals(controller2, sut.findController(HttpMethod.POST, "/path2").controller());
+        assertEquals(controller3, sut.findController(HttpMethod.PUT, "/path3").controller());
+    }
+
+    @Test
+    @DisplayName("Path Variable과 매칭한다")
+    void testPathVariableMatch() {
+        // given
+        final Controller controller = new DummyController();
+        sut.addRoute(HttpMethod.GET, "/todos/{id}", controller);
+
+        // when
+        final Router.MatchResult result = sut.findController(HttpMethod.GET, "/todos/123");
+
+        // then
+        assertNotNull(result);
+        assertEquals(controller, result.controller());
+        assertEquals("123", result.pathVariables().get("id"));
+    }
+
+    @Test
+    @DisplayName("여러 Path Variable과 매칭한다")
+    void testMultiplePathVariables() {
+        // given
+        final Controller controller = new DummyController();
+        sut.addRoute(HttpMethod.GET, "/users/{userId}/posts/{postId}", controller);
+
+        // when
+        final Router.MatchResult result = sut.findController(HttpMethod.GET, "/users/42/posts/999");
+
+        // then
+        assertNotNull(result);
+        final Map<String, String> pathVariables = result.pathVariables();
+        assertEquals("42", pathVariables.get("userId"));
+        assertEquals("999", pathVariables.get("postId"));
+    }
+
+    @Test
+    @DisplayName("정확한 매칭이 Path Variable 매칭보다 우선된다")
+    void testExactMatchHasPriority() {
+        // given
+        final Controller exactController = new DummyController();
+        final Controller variableController = new DummyController();
+        sut.addRoute(HttpMethod.GET, "/todos/new", exactController);
+        sut.addRoute(HttpMethod.GET, "/todos/{id}", variableController);
+
+        // when
+        final Router.MatchResult result = sut.findController(HttpMethod.GET, "/todos/new");
+
+        // then
+        assertNotNull(result);
+        assertEquals(exactController, result.controller());
+    }
+
+    @Test
+    @DisplayName("세그먼트 개수가 다르면 매칭에 실패한다")
+    void testDifferentSegmentCountNotMatch() {
+        // given
+        final Controller controller = new DummyController();
+        sut.addRoute(HttpMethod.GET, "/todos/{id}", controller);
+
+        // when
+        final Router.MatchResult result1 = sut.findController(HttpMethod.GET, "/todos");
+        final Router.MatchResult result2 = sut.findController(HttpMethod.GET, "/todos/1/comments");
+
+        // then
+        assertNull(result1);
+        assertNull(result2);
     }
 
     private static class DummyController implements Controller {

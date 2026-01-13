@@ -15,14 +15,14 @@ public class FrontControllerServlet implements Servlet {
 
     @Override
     public void service(HttpRequest request, HttpResponse response) {
-        Controller controller = router.findController(request.getMethod(), request.getPath());
+        var matchResult = router.findController(request.getMethod(), request.getPath());
 
-        if (controller == null) {
+        if (matchResult == null) {
             response.setStatus(HttpStatus.NOT_FOUND);
             return;
         }
 
-        controller.handle(request, response);
+        matchResult.controller().handle(request, response);
     }
 
 }
