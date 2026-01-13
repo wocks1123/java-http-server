@@ -18,13 +18,9 @@ public class Router {
     public @Nullable MatchResult findController(HttpMethod method, String path) {
         RouteKey exactKey = new RouteKey(method, path);
 
-        if (!hasPathVariable(path)) {
-            Controller exactController = routes.get(exactKey);
-            if (exactController != null) {
-                return new MatchResult(exactController, Map.of());
-            } else {
-                return null;
-            }
+        Controller exactController = routes.get(exactKey);
+        if (exactController != null) {
+            return new MatchResult(exactController, Map.of());
         }
 
         for (Map.Entry<RouteKey, Controller> entry : routes.entrySet()) {
