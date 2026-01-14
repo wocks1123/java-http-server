@@ -35,7 +35,7 @@ public class DatabaseConfig {
 
     public void initializeSchema() {
         try (Connection conn = getConnection()) {
-            // 스키마 초기화 SQL 실행
+            // todos 테이블
             conn.createStatement().execute("""
                     CREATE TABLE IF NOT EXISTS todos (
                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -44,6 +44,16 @@ public class DatabaseConfig {
                         completed BOOLEAN NOT NULL DEFAULT FALSE
                     )
                     """);
+
+            // todo_stats 테이블
+            conn.createStatement().execute("""
+                    CREATE TABLE IF NOT EXISTS todo_stats (
+                        user_id VARCHAR(255) PRIMARY KEY,
+                        total_count INT NOT NULL DEFAULT 0,
+                        completed_count INT NOT NULL DEFAULT 0
+                    )
+                    """);
+
             log.info("Database schema initialized");
         } catch (SQLException e) {
             log.error("Failed to initialize database schema", e);
