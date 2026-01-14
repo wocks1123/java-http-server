@@ -1,6 +1,6 @@
 package dev.labs.httpserver;
 
-import dev.labs.httpserver.app.todo.InMemoryTodoRepository;
+import dev.labs.httpserver.app.todo.JdbcTodoRepository;
 import dev.labs.httpserver.app.todo.TodoController;
 import dev.labs.httpserver.app.todo.TodoRepository;
 import dev.labs.httpserver.controller.FrontControllerServlet;
@@ -22,7 +22,7 @@ public class HttpServerApplication {
         databaseConfig.initializeSchema();
 
         Router router = new Router();
-        TodoRepository todoRepository = new InMemoryTodoRepository();
+        TodoRepository todoRepository = new JdbcTodoRepository(databaseConfig);
         TodoController todoController = new TodoController(todoRepository);
         router.addRoute(HttpMethod.GET, "/todos", todoController::list);
         router.addRoute(HttpMethod.POST, "/todos", todoController::create);
