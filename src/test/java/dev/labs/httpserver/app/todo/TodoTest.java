@@ -14,10 +14,11 @@ class TodoTest {
     @DisplayName("Todo를 생성한다")
     void testCreateTodo() {
         // given
+        final String userId = "user";
         final String title = "Test Todo";
 
         // when
-        final Todo todo = new Todo(title);
+        final Todo todo = new Todo(userId, title);
 
         // then
         assertNull(todo.getId());
@@ -29,7 +30,7 @@ class TodoTest {
     @DisplayName("Todo를 완료 상태로 변경한다")
     void testToggleTodoCompletion() {
         // given
-        final Todo todo = new Todo("Test Todo");
+        final Todo todo = new Todo("user", "Test Todo");
 
         // when
         todo.complete();
@@ -42,7 +43,7 @@ class TodoTest {
     @DisplayName("Todo를 미완료 상태로 변경한다")
     void testUncompleteTodo() {
         // given
-        final Todo todo = new Todo("Test Todo");
+        final Todo todo = new Todo("user", "Test Todo");
         todo.complete();
 
         // when
@@ -56,7 +57,7 @@ class TodoTest {
     @DisplayName("Todo의 제목을 변경한다")
     void testUpdateTodoTitle() {
         // given
-        final Todo todo = new Todo("Old Title");
+        final Todo todo = new Todo("user", "Old Title");
         final String newTitle = "New Title";
 
         // when

@@ -39,6 +39,7 @@ public class DatabaseConfig {
             conn.createStatement().execute("""
                     CREATE TABLE IF NOT EXISTS todos (
                         id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        user_id VARCHAR(255) NOT NULL,
                         title VARCHAR(255) NOT NULL,
                         completed BOOLEAN NOT NULL DEFAULT FALSE
                     )

@@ -79,7 +79,7 @@ public class TodoServlet implements Servlet {
         }
 
         Map<String, String> params = parseFormBody(request.getBody());
-        todoRepository.save(new Todo(params.get("title")));
+        todoRepository.save(new Todo(params.get("userId"), params.get("title")));
         response.setStatus(HttpStatus.OK);
     }
 

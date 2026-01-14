@@ -35,13 +35,14 @@ public class JdbcTodoRepository implements TodoRepository {
     }
 
     private Todo insert(Todo todo) {
-        String sql = "INSERT INTO todos (title, completed) VALUES (?, ?)";
+        String sql = "INSERT INTO todos (user_id, title, completed) VALUES (?, ?)";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            pstmt.setString(1, todo.getTitle());
-            pstmt.setBoolean(2, todo.isCompleted());
+            pstmt.setString(1, todo.getUserId());
+            pstmt.setString(2, todo.getTitle());
+            pstmt.setBoolean(3, todo.isCompleted());
 
             int affectedRows = pstmt.executeUpdate();
 
@@ -86,7 +87,7 @@ public class JdbcTodoRepository implements TodoRepository {
 
     @Override
     public Optional<Todo> findById(TodoId id) {
-        String sql = "SELECT id, title, completed FROM todos WHERE id = ?";
+        String sql = "SELECT id, user_id, title, completed FROM todos WHERE id = ?";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -108,7 +109,7 @@ public class JdbcTodoRepository implements TodoRepository {
 
     @Override
     public List<Todo> findAll() {
-        String sql = "SELECT id, title, completed FROM todos";
+        String sql = "SELECT id, user_id, title, completed FROM todos";
         List<Todo> todos = new ArrayList<>();
 
         try (Connection conn = dbConfig.getConnection();
@@ -127,7 +128,7 @@ public class JdbcTodoRepository implements TodoRepository {
     }
 
     private Todo mapToEntity(ResultSet rs) throws SQLException {
-        Todo todo = new Todo(rs.getString("title"));
+        Todo todo = new Todo(rs.getString("userId"), rs.getString("title"));
         todo.setId(new TodoId(rs.getLong("id")));
         if (rs.getBoolean("completed")) {
             todo.complete();

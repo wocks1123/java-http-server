@@ -5,10 +5,12 @@ import org.jspecify.annotations.Nullable;
 public class Todo {
 
     private TodoId id;
+    private final String userId;
     private String title;
     private boolean completed;
 
-    public Todo(String title) {
+    public Todo(String userId, String title) {
+        this.userId = userId;
         this.title = title;
         this.completed = false;
     }
@@ -31,6 +33,10 @@ public class Todo {
 
     public @Nullable Long getIdValue() {
         return id != null ? id.value() : null;
+    }
+
+    public String getUserId() {
+        return userId;
     }
 
     public String getTitle() {

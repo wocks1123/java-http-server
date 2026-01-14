@@ -3,6 +3,7 @@ package dev.labs.httpserver.app.todo;
 import dev.labs.httpserver.http.HttpRequest;
 import dev.labs.httpserver.http.HttpResponse;
 import dev.labs.httpserver.http.HttpStatus;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,14 +28,15 @@ public class TodoController {
 
     public void create(HttpRequest request, HttpResponse response) {
         Map<String, String> params = parseFormBody(request.getBody());
+        String userId = params.get("userId");
         String title = params.get("title");
 
-        if (title == null || title.isBlank()) {
+        if (!hasText(title) || !hasText(userId)) {
             response.setStatus(HttpStatus.BAD_REQUEST);
             return;
         }
 
-        todoRepository.save(new Todo(title));
+        todoRepository.save(new Todo(userId, title));
         response.setStatus(HttpStatus.OK);
     }
 
@@ -97,6 +99,10 @@ public class TodoController {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    private boolean hasText(@Nullable String str) {
+        return str != null && !str.isBlank();
     }
 
 }
