@@ -27,6 +27,8 @@ dependencies {
     errorprone("com.google.errorprone:error_prone_core:2.37.0")
     errorprone("com.uber.nullaway:nullaway:0.12.6")
 
+    runtimeOnly("com.h2database:h2:2.4.240")
+
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
