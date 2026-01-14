@@ -15,6 +15,7 @@ import java.util.Optional;
 
 import static java.net.URLDecoder.decode;
 
+@Deprecated
 public class TodoServlet implements Servlet {
 
     private static final Logger log = LoggerFactory.getLogger(TodoServlet.class);
