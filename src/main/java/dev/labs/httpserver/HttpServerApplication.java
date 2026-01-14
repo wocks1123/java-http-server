@@ -5,6 +5,7 @@ import dev.labs.httpserver.app.todo.TodoController;
 import dev.labs.httpserver.app.todo.TodoRepository;
 import dev.labs.httpserver.controller.FrontControllerServlet;
 import dev.labs.httpserver.controller.Router;
+import dev.labs.httpserver.db.DatabaseConfig;
 import dev.labs.httpserver.http.HttpMethod;
 import dev.labs.httpserver.http.HttpStatus;
 import dev.labs.httpserver.server.HttpServer;
@@ -16,6 +17,10 @@ public class HttpServerApplication {
     private static final int PORT = 8080;
 
     public static void main(String[] args) {
+
+        DatabaseConfig databaseConfig = DatabaseConfig.forProduction();
+        databaseConfig.initializeSchema();
+
         Router router = new Router();
         TodoRepository todoRepository = new InMemoryTodoRepository();
         TodoController todoController = new TodoController(todoRepository);
