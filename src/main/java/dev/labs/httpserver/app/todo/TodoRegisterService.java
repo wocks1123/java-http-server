@@ -11,9 +11,10 @@ public class TodoRegisterService {
         this.todoStatsRepository = todoStatsRepository;
     }
 
-    public void registerTodo(RegisterTodoCommand cmd) {
-        todoRepository.save(cmd.toTodo());
+    public TodoId registerTodo(RegisterTodoCommand cmd) {
+        Todo savedTodo = todoRepository.save(cmd.toTodo());
         todoStatsRepository.increaseTotalCount(cmd.userId());
+        return savedTodo.getId();
     }
 
 }
