@@ -36,4 +36,11 @@ public class InMemoryTodoRepository implements TodoRepository {
         return List.copyOf(store.values());
     }
 
+    @Override
+    public List<Todo> findByUserId(String userId) {
+        return store.values().stream()
+                .filter(todo -> todo.getUserId().equals(userId))
+                .toList();
+    }
+
 }

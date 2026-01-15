@@ -127,6 +127,29 @@ public class JdbcTodoRepository implements TodoRepository {
         }
     }
 
+    @Override
+    public List<Todo> findByUserId(String userId) {
+        String sql = "SELECT id, user_id, title, completed FROM todos WHERE user_id = ?";
+        List<Todo> todos = new ArrayList<>();
+
+        try (Connection conn = dbConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            pstmt.setString(1, userId);
+
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    todos.add(mapToEntity(rs));
+                }
+            }
+
+            return todos;
+        } catch (SQLException e) {
+            log.error("Failed to find todos by userId", e);
+            throw new RuntimeException(e);
+        }
+    }
+
     private Todo mapToEntity(ResultSet rs) throws SQLException {
         Todo todo = new Todo(rs.getString("userId"), rs.getString("title"));
         todo.setId(new TodoId(rs.getLong("id")));

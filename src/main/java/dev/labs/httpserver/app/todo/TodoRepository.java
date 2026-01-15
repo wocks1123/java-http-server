@@ -13,4 +13,6 @@ public interface TodoRepository {
 
     List<Todo> findAll();
 
+    List<Todo> findByUserId(String userId);
+
 }
