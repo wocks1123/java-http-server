@@ -12,7 +12,7 @@ class TodoRegisterServiceTest {
     }
 
     @Test
-    @DisplayName("할일은 저장되었지만 통계 업데이트가 실패하면 실제 할일 개수와 통계 수치가 일치하지 않는다")
+    @DisplayName("할일 등록 중 통계 업데이트가 실패하면 할일과 통계 모두 저장되지 않아야 한다")
     void registerTodo_WhenStatsUpdateFails_CausesDataInconsistency() {
 
     }
