@@ -23,6 +23,14 @@ public class DatabaseConfig {
 
     public static DatabaseConfig forProduction() {
         return new DatabaseConfig(
+                "jdbc:h2:mem:production;DB_CLOSE_DELAY=-1",
+                "sa",
+                ""
+        );
+    }
+
+    public static DatabaseConfig forTest() {
+        return new DatabaseConfig(
                 "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
                 "sa",
                 ""
@@ -57,6 +65,17 @@ public class DatabaseConfig {
             log.info("Database schema initialized");
         } catch (SQLException e) {
             log.error("Failed to initialize database schema", e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void cleanUp() {
+        try (Connection conn = getConnection()) {
+            conn.createStatement().execute("TRUNCATE TABLE todos");
+            conn.createStatement().execute("TRUNCATE TABLE todo_stats");
+            log.debug("All data cleared and sequences reset");
+        } catch (SQLException e) {
+            log.error("Failed to clear database", e);
             throw new RuntimeException(e);
         }
     }
