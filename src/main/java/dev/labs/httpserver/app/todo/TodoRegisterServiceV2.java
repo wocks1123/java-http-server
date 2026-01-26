@@ -1,11 +1,15 @@
 package dev.labs.httpserver.app.todo;
 
 import dev.labs.httpserver.db.DatabaseConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 
 public class TodoRegisterServiceV2 {
+
+    private static final Logger log = LoggerFactory.getLogger(TodoRegisterServiceV2.class);
 
     private final DatabaseConfig dbConfig;
 
@@ -30,10 +34,22 @@ public class TodoRegisterServiceV2 {
             conn.commit();
             return savedTodo.getId();
         } catch (Exception e) {
-            if (conn != null) conn.rollback();
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    e.addSuppressed(rollbackEx);
+                }
+            }
             throw new RuntimeException(e);
         } finally {
-            if (conn != null) conn.close();
+            if (conn != null) {
+                try {
+                    conn.close();
+                } catch (SQLException closeEx) {
+                    log.error("Failed to close connection", closeEx);
+                }
+            }
         }
     }
 
