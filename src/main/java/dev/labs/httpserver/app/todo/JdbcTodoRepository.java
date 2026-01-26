@@ -35,7 +35,7 @@ public class JdbcTodoRepository implements TodoRepository {
     }
 
     private Todo insert(Todo todo) {
-        String sql = "INSERT INTO todos (user_id, title, completed) VALUES (?, ?)";
+        String sql = "INSERT INTO todos (user_id, title, completed) VALUES (?, ?, ?)";
 
         try (Connection conn = dbConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -151,7 +151,7 @@ public class JdbcTodoRepository implements TodoRepository {
     }
 
     private Todo mapToEntity(ResultSet rs) throws SQLException {
-        Todo todo = new Todo(rs.getString("userId"), rs.getString("title"));
+        Todo todo = new Todo(rs.getString("user_id"), rs.getString("title"));
         todo.setId(new TodoId(rs.getLong("id")));
         if (rs.getBoolean("completed")) {
             todo.complete();
