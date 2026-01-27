@@ -1,6 +1,7 @@
 package dev.labs.httpserver.app.todo;
 
 import dev.labs.httpserver.db.DatabaseConfig;
+import dev.labs.httpserver.db.SimpleTransactionManager;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class TodoRegisterServiceTest {
 
     private TodoRegisterService sut;
+    private SimpleTransactionManager tx;
     private TodoRepository todoRepository;
     private TodoStatsRepository todoStatsRepository;
     private DatabaseConfig databaseConfig;
@@ -35,9 +37,10 @@ class TodoRegisterServiceTest {
     @Test
     @DisplayName("사용자가 할일을 등록하면 할일 목록과 개수 통계가 함께 저장된다")
     void registerTodo_SavesBothTodoAndStats() {
+        tx = new SimpleTransactionManager(databaseConfig);
         todoRepository = new JdbcTodoRepository(databaseConfig);
         todoStatsRepository = new JdbcTodoStatsRepository(databaseConfig);
-        sut = new TodoRegisterService(todoRepository, todoStatsRepository);
+        sut = new TodoRegisterService(tx, todoRepository, todoStatsRepository);
 
         // given
         final String userId = "user123";
@@ -63,9 +66,10 @@ class TodoRegisterServiceTest {
     @Test
     @DisplayName("할일 등록 중 통계 업데이트가 실패하면 할일과 통계 모두 저장되지 않아야 한다")
     void registerTodo_WhenStatsUpdateFails_CausesDataInconsistency() {
+        tx = new SimpleTransactionManager(databaseConfig);
         todoRepository = new JdbcTodoRepository(databaseConfig);
         todoStatsRepository = new JdbcTodoStatsRepository(databaseConfig);
-        sut = new TodoRegisterService(todoRepository, new FailingUpdateTodoStatsRepository(todoStatsRepository));
+        sut = new TodoRegisterService(tx, todoRepository, new FailingUpdateTodoStatsRepository(todoStatsRepository));
 
         // given
         final String userId = "user123";
