@@ -1,11 +1,13 @@
 package dev.labs.httpserver.app.todo;
 
-import dev.labs.httpserver.db.ConnectionProvider;
-import dev.labs.httpserver.db.DatabaseConfig;
+import dev.labs.httpserver.db.JdbcExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -14,10 +16,10 @@ public class JdbcTodoRepository implements TodoRepository {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcTodoRepository.class);
 
-    private final DatabaseConfig dbConfig;
+    private final JdbcExecutor jdbcExecutor;
 
-    public JdbcTodoRepository(DatabaseConfig dbConfig) {
-        this.dbConfig = dbConfig;
+    public JdbcTodoRepository(JdbcExecutor jdbcExecutor) {
+        this.jdbcExecutor = jdbcExecutor;
     }
 
     @Override
@@ -38,10 +40,7 @@ public class JdbcTodoRepository implements TodoRepository {
     private Todo insert(Todo todo) {
         String sql = "INSERT INTO todos (user_id, title, completed) VALUES (?, ?, ?)";
 
-        Connection conn = null;
-        try {
-            conn = ConnectionProvider.get(dbConfig);
-
+        return jdbcExecutor.execute(conn -> {
             try (PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
                 pstmt.setString(1, todo.getUserId());
                 pstmt.setString(2, todo.getTitle());
@@ -53,65 +52,41 @@ public class JdbcTodoRepository implements TodoRepository {
                 }
 
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        long id = generatedKeys.getLong(1);
-                        todo.setId(new TodoId(id));
-                    } else {
+                    if (!generatedKeys.next()) {
                         throw new SQLException("Creating todo failed, no ID obtained.");
                     }
-                }
-
-                return todo;
-            }
-        } catch (SQLException e) {
-            log.error("Failed to insert todo", e);
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                try {
-                    ConnectionProvider.release(conn);
+                    long id = generatedKeys.getLong(1);
+                    todo.setId(new TodoId(id));
+                    return todo;
                 } catch (SQLException e) {
-                    log.warn("Failed to release connection", e);
+                    log.error("Failed to insert todo", e);
+                    throw new RuntimeException(e);
                 }
             }
-        }
+        });
     }
-
 
     private Todo update(Todo todo) {
         String sql = "UPDATE todos SET title = ?, completed = ? WHERE id = ?";
 
-        Connection conn = null;
-        try {
-            conn = ConnectionProvider.get(dbConfig);
-
+        return jdbcExecutor.execute(conn -> {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setString(1, todo.getTitle());
                 pstmt.setBoolean(2, todo.isCompleted());
                 pstmt.setLong(3, todo.getId().value());
                 pstmt.executeUpdate();
                 return todo;
+            } catch (SQLException e) {
+                log.error("Failed to update todo", e);
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            log.error("Failed to update todo", e);
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                try {
-                    ConnectionProvider.release(conn);
-                } catch (SQLException e) {
-                    log.warn("Failed to release connection", e);
-                }
-            }
-        }
+        });
     }
 
     @Override
     public Optional<Todo> findById(TodoId id) {
         String sql = "SELECT id, user_id, title, completed FROM todos WHERE id = ?";
-        Connection conn = null;
-        try {
-            conn = ConnectionProvider.get(dbConfig);
+        return jdbcExecutor.execute(conn -> {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
                 pstmt.setLong(1, id.value());
 
@@ -121,29 +96,19 @@ public class JdbcTodoRepository implements TodoRepository {
                     }
                 }
                 return Optional.empty();
+            } catch (SQLException e) {
+                log.error("Failed to find todo by id", e);
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            log.error("Failed to find todo by id", e);
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                try {
-                    ConnectionProvider.release(conn);
-                } catch (SQLException e) {
-                    log.warn("Failed to release connection", e);
-                }
-            }
-        }
+        });
     }
 
     @Override
     public List<Todo> findAll() {
         String sql = "SELECT id, user_id, title, completed FROM todos";
-        List<Todo> todos = new ArrayList<>();
 
-        Connection conn = null;
-        try {
-            conn = ConnectionProvider.get(dbConfig);
+        return jdbcExecutor.execute(conn -> {
+            List<Todo> todos = new ArrayList<>();
             try (PreparedStatement pstmt = conn.prepareStatement(sql);
                  ResultSet rs = pstmt.executeQuery()) {
 
@@ -152,19 +117,11 @@ public class JdbcTodoRepository implements TodoRepository {
                 }
 
                 return todos;
+            } catch (SQLException e) {
+                log.error("Failed to find all todos", e);
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            log.error("Failed to find all todos", e);
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                try {
-                    ConnectionProvider.release(conn);
-                } catch (SQLException e) {
-                    log.warn("Failed to release connection", e);
-                }
-            }
-        }
+        });
     }
 
     @Override
@@ -172,9 +129,7 @@ public class JdbcTodoRepository implements TodoRepository {
         String sql = "SELECT id, user_id, title, completed FROM todos WHERE user_id = ?";
         List<Todo> todos = new ArrayList<>();
 
-        Connection conn = null;
-        try {
-            conn = ConnectionProvider.get(dbConfig);
+        return jdbcExecutor.execute(conn -> {
             try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
 
                 pstmt.setString(1, userId);
@@ -184,21 +139,12 @@ public class JdbcTodoRepository implements TodoRepository {
                         todos.add(mapToEntity(rs));
                     }
                 }
-
                 return todos;
+            } catch (SQLException e) {
+                log.error("Failed to find todos by userId", e);
+                throw new RuntimeException(e);
             }
-        } catch (SQLException e) {
-            log.error("Failed to find todos by userId", e);
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                try {
-                    ConnectionProvider.release(conn);
-                } catch (SQLException e) {
-                    log.warn("Failed to release connection", e);
-                }
-            }
-        }
+        });
     }
 
     private Todo mapToEntity(ResultSet rs) throws SQLException {

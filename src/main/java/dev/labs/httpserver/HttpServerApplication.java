@@ -6,6 +6,7 @@ import dev.labs.httpserver.app.todo.TodoRepository;
 import dev.labs.httpserver.controller.FrontControllerServlet;
 import dev.labs.httpserver.controller.Router;
 import dev.labs.httpserver.db.DatabaseConfig;
+import dev.labs.httpserver.db.JdbcExecutor;
 import dev.labs.httpserver.http.HttpMethod;
 import dev.labs.httpserver.http.HttpStatus;
 import dev.labs.httpserver.server.HttpServer;
@@ -22,7 +23,8 @@ public class HttpServerApplication {
         databaseConfig.initializeSchema();
 
         Router router = new Router();
-        TodoRepository todoRepository = new JdbcTodoRepository(databaseConfig);
+        JdbcExecutor jdbcExecutor = new JdbcExecutor(databaseConfig);
+        TodoRepository todoRepository = new JdbcTodoRepository(jdbcExecutor);
         TodoController todoController = new TodoController(todoRepository);
         router.addRoute(HttpMethod.GET, "/todos", todoController::list);
         router.addRoute(HttpMethod.POST, "/todos", todoController::create);
