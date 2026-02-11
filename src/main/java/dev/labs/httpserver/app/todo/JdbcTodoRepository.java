@@ -1,5 +1,6 @@
 package dev.labs.httpserver.app.todo;
 
+import dev.labs.httpserver.db.DataAccessException;
 import dev.labs.httpserver.db.JdbcExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,19 +49,16 @@ public class JdbcTodoRepository implements TodoRepository {
 
                 int affectedRows = pstmt.executeUpdate();
                 if (affectedRows == 0) {
-                    throw new SQLException("Creating todo failed, no rows affected.");
+                    throw new DataAccessException("Creating todo failed, no rows affected.");
                 }
 
                 try (ResultSet generatedKeys = pstmt.getGeneratedKeys()) {
                     if (!generatedKeys.next()) {
-                        throw new SQLException("Creating todo failed, no ID obtained.");
+                        throw new DataAccessException("Creating todo failed, no ID obtained.");
                     }
                     long id = generatedKeys.getLong(1);
                     todo.setId(new TodoId(id));
                     return todo;
-                } catch (SQLException e) {
-                    log.error("Failed to insert todo", e);
-                    throw new RuntimeException(e);
                 }
             }
         });
@@ -76,9 +74,6 @@ public class JdbcTodoRepository implements TodoRepository {
                 pstmt.setLong(3, todo.getId().value());
                 pstmt.executeUpdate();
                 return todo;
-            } catch (SQLException e) {
-                log.error("Failed to update todo", e);
-                throw new RuntimeException(e);
             }
         });
     }
@@ -96,9 +91,6 @@ public class JdbcTodoRepository implements TodoRepository {
                     }
                 }
                 return Optional.empty();
-            } catch (SQLException e) {
-                log.error("Failed to find todo by id", e);
-                throw new RuntimeException(e);
             }
         });
     }
@@ -117,9 +109,6 @@ public class JdbcTodoRepository implements TodoRepository {
                 }
 
                 return todos;
-            } catch (SQLException e) {
-                log.error("Failed to find all todos", e);
-                throw new RuntimeException(e);
             }
         });
     }
@@ -140,9 +129,6 @@ public class JdbcTodoRepository implements TodoRepository {
                     }
                 }
                 return todos;
-            } catch (SQLException e) {
-                log.error("Failed to find todos by userId", e);
-                throw new RuntimeException(e);
             }
         });
     }

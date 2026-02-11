@@ -22,7 +22,7 @@ public class JdbcExecutor {
             conn = ConnectionProvider.get(dbConfig);
             return callback.doInConnection(conn);
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new DataAccessException("Database operation failed", e);
         } finally {
             if (conn != null) {
                 try {

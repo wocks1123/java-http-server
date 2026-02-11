@@ -37,9 +37,6 @@ public class JdbcTodoStatsRepository implements TodoStatsRepository {
 
                 pstmt.executeUpdate();
                 return null;
-            } catch (SQLException e) {
-                log.error("Failed to increase total count with transaction", e);
-                throw new RuntimeException(e);
             }
         });
     }
@@ -62,9 +59,6 @@ public class JdbcTodoStatsRepository implements TodoStatsRepository {
 
                 pstmt.executeUpdate();
                 return null;
-            } catch (SQLException e) {
-                log.error("Failed to increase completed count with transaction", e);
-                throw new RuntimeException(e);
             }
         });
     }
@@ -84,9 +78,6 @@ public class JdbcTodoStatsRepository implements TodoStatsRepository {
                 }
 
                 return Optional.empty();
-            } catch (SQLException e) {
-                log.error("Failed to find stats by userId with transaction", e);
-                throw new RuntimeException(e);
             }
         });
     }
