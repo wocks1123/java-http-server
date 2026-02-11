@@ -2,6 +2,7 @@ package dev.labs.httpserver.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.function.Supplier;
 
 public class SimpleTransactionManager {
 
@@ -18,7 +19,11 @@ public class SimpleTransactionManager {
     }
 
     public void commit() throws SQLException {
-        ConnectionContext.get().commit();
+        Connection connection = ConnectionContext.get();
+        if (connection == null) {
+            throw new IllegalStateException("No connection found in context to commit");
+        }
+        connection.commit();
     }
 
     public void rollback() throws SQLException {
@@ -34,4 +39,55 @@ public class SimpleTransactionManager {
             conn.close();
         }
     }
+
+    public <T> T execute(Supplier<T> operation) {
+        boolean isNewTransaction = (ConnectionContext.get() == null);
+        try {
+            if (isNewTransaction) {
+                begin();
+            }
+
+            T result = operation.get();
+
+            if (isNewTransaction) {
+                commit();
+            }
+
+            return result;
+        } catch (RuntimeException e) {
+            if (isNewTransaction) {
+                try {
+                    rollback();
+                } catch (SQLException se) {
+                    e.addSuppressed(se);
+                }
+            }
+            throw e;
+        } catch (Exception e) {
+            RuntimeException re = new RuntimeException(e);
+            if (isNewTransaction) {
+                try {
+                    rollback();
+                } catch (SQLException ex) {
+                    re.addSuppressed(ex);
+                }
+            }
+            throw re;
+        } finally {
+            if (isNewTransaction) {
+                try {
+                    end();
+                } catch (SQLException ignored) {
+                }
+            }
+        }
+    }
+
+    public void execute(Runnable action) {
+        execute(() -> {
+            action.run();
+            return null;
+        });
+    }
+
 }
