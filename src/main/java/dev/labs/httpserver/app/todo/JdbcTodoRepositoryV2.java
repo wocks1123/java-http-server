@@ -7,6 +7,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated(forRemoval = true)
 public class JdbcTodoRepositoryV2 {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcTodoRepositoryV2.class);

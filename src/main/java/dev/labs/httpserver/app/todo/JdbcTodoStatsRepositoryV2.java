@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Optional;
 
+@Deprecated(forRemoval = true)
 public class JdbcTodoStatsRepositoryV2 {
 
     private static final Logger log = LoggerFactory.getLogger(JdbcTodoStatsRepositoryV2.class);
