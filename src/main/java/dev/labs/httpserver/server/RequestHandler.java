@@ -1,6 +1,7 @@
 package dev.labs.httpserver.server;
 
 import dev.labs.httpserver.http.HttpRequest;
+import dev.labs.httpserver.http.HttpRequestReader;
 import dev.labs.httpserver.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,9 +14,7 @@ public class RequestHandler {
     private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
 
     private final HttpHandler httpHandler;
-
-    private static final int BUFFER_SIZE = 8192;
-
+    private final HttpRequestReader httpRequestReader = new HttpRequestReader();
 
     public RequestHandler(HttpHandler httpHandler) {
         this.httpHandler = httpHandler;
@@ -23,14 +22,11 @@ public class RequestHandler {
 
     public void handle(InputStream inputStream, OutputStream outputStream) {
         try {
-            byte[] buffer = new byte[BUFFER_SIZE];
-            int bytesRead = inputStream.read(buffer);
-            if (bytesRead == -1) {
+            byte[] rawRequest = httpRequestReader.read(inputStream);
+            if (rawRequest.length == 0) {
                 log.warn("No data received from client.");
                 return;
             }
-            byte[] rawRequest = new byte[bytesRead];
-            System.arraycopy(buffer, 0, rawRequest, 0, bytesRead);
             HttpRequest request = HttpRequest.parse(rawRequest);
             log.info("parsed: {} {}", request.getMethod(), request.getPath());
 
