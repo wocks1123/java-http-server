@@ -32,12 +32,17 @@ public class RequestHandler {
             byte[] rawRequest = new byte[bytesRead];
             System.arraycopy(buffer, 0, rawRequest, 0, bytesRead);
             HttpRequest request = HttpRequest.parse(rawRequest);
+            log.info("parsed: {} {}", request.getMethod(), request.getPath());
+
             HttpResponse response = new HttpResponse();
             httpHandler.handle(request, response);
-            outputStream.write(response.toBytes());
+
+            byte[] responseBytes = response.toBytes();
+            outputStream.write(responseBytes);
             outputStream.flush();
-            log.debug("request from client \n{}", request);
-            log.debug("response to client \n{}", response);
+
+            int bodyLength = response.getBody() != null ? response.getBody().length : 0;
+            log.info("wrote: {} {}bytes", response.getStatusCode(), bodyLength);
         } catch (Exception e) {
             log.error("Exception while handling request:", e);
         }

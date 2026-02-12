@@ -34,8 +34,13 @@ public class HttpServer {
 
             while (running) {
                 Socket clientSocket = serverSocket.accept();
-                log.info("Client connected: {}", clientSocket.getInetAddress());
-                handleRequest(clientSocket, servletContainer);
+                RequestContext.init();
+                log.info("accept");
+                try {
+                    handleRequest(clientSocket, servletContainer);
+                } finally {
+                    RequestContext.clear();
+                }
             }
         } catch (IOException e) {
             if (running) {
