@@ -6,7 +6,7 @@ public class RequestContext {
     public static final String REQUEST_ID_KEY = "requestId";
 
     public static void init() {
-        MDC.put(REQUEST_ID_KEY, String.valueOf(RequestIdGenerator.next()));
+        MDC.put(REQUEST_ID_KEY, String.format("%05d", RequestIdGenerator.next()));
     }
 
     public static void clear() {
