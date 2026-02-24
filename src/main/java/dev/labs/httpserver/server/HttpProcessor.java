@@ -9,14 +9,14 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-public class RequestHandler {
+public class HttpProcessor {
 
-    private static final Logger log = LoggerFactory.getLogger(RequestHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(HttpProcessor.class);
 
     private final HttpHandler httpHandler;
     private final HttpRequestReader httpRequestReader = new HttpRequestReader();
 
-    public RequestHandler(HttpHandler httpHandler) {
+    public HttpProcessor(HttpHandler httpHandler) {
         this.httpHandler = httpHandler;
     }
 

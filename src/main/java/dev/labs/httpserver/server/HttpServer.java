@@ -71,7 +71,7 @@ public class HttpServer {
                 InputStream inputStream = socket.getInputStream();
                 OutputStream outputStream = socket.getOutputStream()
         ) {
-            RequestHandler requestHandler = new RequestHandler(new ServletHttpHandler(servletContainer));
+            HttpProcessor requestHandler = new HttpProcessor(new ServletHttpHandler(servletContainer));
             requestHandler.handle(inputStream, outputStream);
         } catch (IOException e) {
             log.error("Error handling client request:", e);

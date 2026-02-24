@@ -18,15 +18,21 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class RequestHandlerTest {
+class HttpProcessorTest {
 
-    private RequestHandler sut;
+    private HttpProcessor sut;
+
     private SpyHttpHandler httpHandler;
 
+
+
     @BeforeEach
+
     void setup() {
+
         httpHandler = new SpyHttpHandler();
-        sut = new RequestHandler(httpHandler);
+
+        sut = new HttpProcessor(httpHandler);
     }
 
     @Test
