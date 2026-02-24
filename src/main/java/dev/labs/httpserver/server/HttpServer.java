@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HttpServer {
 
@@ -18,8 +20,11 @@ public class HttpServer {
     private final int port;
     private final ServletContainer servletContainer;
 
+    private static final int THREAD_POOL_SIZE = 10;
+
     private volatile boolean running = false;
     private ServerSocket serverSocket;
+    private ExecutorService threadPool;
 
     public HttpServer(int port, ServletContainer servletContainer) {
         this.port = port;
@@ -27,6 +32,7 @@ public class HttpServer {
     }
 
     public void start() {
+        threadPool = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             this.serverSocket = serverSocket;
             running = true;
@@ -34,13 +40,15 @@ public class HttpServer {
 
             while (running) {
                 Socket clientSocket = serverSocket.accept();
-                RequestContext.init();
-                log.info("accept");
-                try {
-                    handleRequest(clientSocket, servletContainer);
-                } finally {
-                    RequestContext.clear();
-                }
+                threadPool.submit(() -> {
+                    RequestContext.init();
+                    log.info("accept");
+                    try {
+                        handleRequest(clientSocket, servletContainer);
+                    } finally {
+                        RequestContext.clear();
+                    }
+                });
             }
         } catch (IOException e) {
             if (running) {
@@ -48,6 +56,7 @@ public class HttpServer {
             }
         } finally {
             running = false;
+            threadPool.shutdown();
         }
     }
 
