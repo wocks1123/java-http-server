@@ -4,6 +4,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -84,6 +85,48 @@ class HttpRequestReaderTest {
 
         // then
         assertEquals(0, result.length);
+    }
+
+    @Test
+    @DisplayName("같은 스트림에서 GET 요청 2개를 순서대로 읽는다")
+    void readTwoConsecutiveGetRequests() throws IOException {
+        // given
+        byte[] req1 = "GET /a HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        byte[] req2 = "GET /b HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        InputStream inputStream = new ByteArrayInputStream(concat(req1, req2));
+
+        // when
+        byte[] result1 = sut.read(inputStream);
+        byte[] result2 = sut.read(inputStream);
+
+        // then
+        assertArrayEquals(req1, result1);
+        assertArrayEquals(req2, result2);
+    }
+
+    @Test
+    @DisplayName("같은 스트림에서 POST 요청 후 GET 요청을 읽는다")
+    void readPostThenGet() throws IOException {
+        // given
+        String body = "title=buy+milk";
+        byte[] req1 = ("POST /todos HTTP/1.1\r\nContent-Length: " + body.length() + "\r\n\r\n" + body).getBytes(StandardCharsets.UTF_8);
+        byte[] req2 = "GET /todos HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        InputStream inputStream = new ByteArrayInputStream(concat(req1, req2));
+
+        // when
+        byte[] result1 = sut.read(inputStream);
+        byte[] result2 = sut.read(inputStream);
+
+        // then
+        assertArrayEquals(req1, result1);
+        assertArrayEquals(req2, result2);
+    }
+
+    private static byte[] concat(byte[] a, byte[] b) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(a);
+        out.write(b);
+        return out.toByteArray();
     }
 
     /**

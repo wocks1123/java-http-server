@@ -4,17 +4,26 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class HttpRequestReader {
 
     private static final byte[] HEADER_END_MARKER = "\r\n\r\n".getBytes(StandardCharsets.UTF_8);
     private static final int READ_BUFFER_SIZE = 4096;
 
+    private byte[] remainingBytes = new byte[0];
+
     public byte[] read(InputStream inputStream) throws IOException {
         ByteArrayOutputStream accumulated = new ByteArrayOutputStream();
-        byte[] buffer = new byte[READ_BUFFER_SIZE];
 
-        int headerEndIndex = -1;
+        // 이전 read()에서 초과 읽은 바이트가 있으면 먼저 accumulated에 넣기
+        if (remainingBytes.length > 0) {
+            accumulated.write(remainingBytes);
+            remainingBytes = new byte[0];
+        }
+
+        byte[] buffer = new byte[READ_BUFFER_SIZE];
+        int headerEndIndex = findHeaderEndIndex(accumulated.toByteArray());
 
         // Phase 1: 헤더 끝(\r\n\r\n)이 나올 때까지 읽기
         while (headerEndIndex == -1) {
@@ -30,9 +39,15 @@ public class HttpRequestReader {
             return new byte[0];
         }
 
+        if (headerEndIndex == -1) {
+            return accumulated.toByteArray();
+        }
+
         // Phase 2: Content-Length가 있으면 body가 모두 도착할 때까지 읽기
         int contentLength = extractContentLength(accumulated.toByteArray(), headerEndIndex);
-        if (contentLength > 0 && headerEndIndex != -1) {
+        int requestEnd;
+
+        if (contentLength > 0) {
             int headerSize = headerEndIndex + HEADER_END_MARKER.length;
             int totalExpected = headerSize + contentLength;
 
@@ -43,9 +58,19 @@ public class HttpRequestReader {
                 }
                 accumulated.write(buffer, 0, bytesRead);
             }
+            requestEnd = Math.min(totalExpected, accumulated.size());
+        } else {
+            requestEnd = headerEndIndex + HEADER_END_MARKER.length;
         }
 
-        return accumulated.toByteArray();
+        byte[] allBytes = accumulated.toByteArray();
+
+        // 현재 요청 경계를 넘은 바이트는 remainingBytes에 보관
+        if (allBytes.length > requestEnd) {
+            remainingBytes = Arrays.copyOfRange(allBytes, requestEnd, allBytes.length);
+        }
+
+        return Arrays.copyOfRange(allBytes, 0, requestEnd);
     }
 
     private int findHeaderEndIndex(byte[] data) {
