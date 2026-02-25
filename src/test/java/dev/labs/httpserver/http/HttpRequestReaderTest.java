@@ -105,6 +105,26 @@ class HttpRequestReaderTest {
     }
 
     @Test
+    @DisplayName("같은 스트림에서 GET 요청 3개를 순서대로 읽는다")
+    void readThreeConsecutiveGetRequests() throws IOException {
+        // given
+        byte[] req1 = "GET /a HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        byte[] req2 = "GET /b HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        byte[] req3 = "GET /c HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes(StandardCharsets.UTF_8);
+        InputStream inputStream = new ByteArrayInputStream(concat(req1, req2, req3));
+
+        // when
+        byte[] result1 = sut.read(inputStream);
+        byte[] result2 = sut.read(inputStream);
+        byte[] result3 = sut.read(inputStream);
+
+        // then
+        assertArrayEquals(req1, result1);
+        assertArrayEquals(req2, result2);
+        assertArrayEquals(req3, result3);
+    }
+
+    @Test
     @DisplayName("같은 스트림에서 POST 요청 후 GET 요청을 읽는다")
     void readPostThenGet() throws IOException {
         // given
@@ -122,10 +142,11 @@ class HttpRequestReaderTest {
         assertArrayEquals(req2, result2);
     }
 
-    private static byte[] concat(byte[] a, byte[] b) throws IOException {
+    private static byte[] concat(byte[]... arrays) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
-        out.write(a);
-        out.write(b);
+        for (byte[] array : arrays) {
+            out.write(array);
+        }
         return out.toByteArray();
     }
 
