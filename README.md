@@ -94,7 +94,7 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
     * [x] “트랜잭션 = Connection 상태”를 설명할 수 있다
 
 * [x] JDBC Repository (직사용 버전)
-    * [x] `JdbcTodoRepository` 구현 (CRUD 최소 세트) (`JdbcTodoRepositoryV2`가 직사용 버전, `JdbcTodoRepository`는 이후 `JdbcExecutor` 기반 버전)
+    * [x] `JdbcTodoRepository` 구현 (CRUD 최소 세트) (`JdbcTodoRepositoryV2`가 직사용 버전, `JdbcTodoRepository`는 이후 `JdbcExecutor`기반 버전)
     * [x] try/finally로 `Statement/ResultSet/Connection` 자원 해제 보장
     * [x] `SQLException`을 Runtime 예외로 변환해 전파
     * [x] 부분 커밋이 실제로 발생하는 유즈케이스를 서비스 레벨에서 재현
@@ -113,7 +113,7 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
     * [x] `DataSourceUtils#getConnection(DataSource)` 구현 (`ConnectionProvider`로 구현)
         - 트랜잭션 중이면 바인딩된 Connection 반환
         - 아니면 새 Connection 반환
-    * [x] `JdbcTemplate`이 `dataSource.getConnection()` 대신 `DataSourceUtils`를 통해 커넥션을 얻도록 변경 (`JdbcExecutor`가 `ConnectionProvider` 사용)
+    * [x] `JdbcTemplate`이 `dataSource.getConnection()` 대신 `DataSourceUtils`를 통해 커넥션을 얻도록 변경 (`JdbcExecutor`가`ConnectionProvider` 사용)
     * [x] “같은 트랜잭션 = 같은 Connection” 재현 (여러 DAO 호출에서 동일 커넥션 사용)
 
 * [x] Spring JDBC 책임 3: 트랜잭션 경계 관리 (TransactionManager)
@@ -130,3 +130,27 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
     * [ ] `TransactionTemplate#execute(...)` 형태로 경계 분리
     * [ ] (선택) 애노테이션 기반 프록시로 `@Transactional` 흐름 최소 재현
     * [ ] self-invocation / 스레드 경계(ThreadLocal)의 한계 설명 가능
+
+### Keep-Alive (HTTP/1.1)
+
+* [ ] 연결 재사용 지원
+    * [ ] 요청 1회 처리 후 소켓 유지
+    * [ ] 동일 연결에서 다중 요청 처리
+
+* [ ] 요청 경계 처리 강화
+    * [ ] `\r\n\r\n` 기준 헤더 파싱 안정화
+    * [ ] `Content-Length` 기반 바디 정확히 읽기
+    * [ ] 남은 버퍼 재사용
+
+* [ ] 연결 종료 정책
+    * [ ] `Connection: close` 지원
+    * [ ] `keepAliveTimeout` 적용
+    * [ ] `maxRequestsPerConnection` 제한
+
+* [ ] 응답 정합성 보장
+    * [ ] `Content-Length` 정확히 설정
+    * [ ] keep-alive / close 헤더 일관성 유지
+
+* [ ] 통합 테스트
+    * [ ] 동일 연결 다중 요청 성공
+    * [ ] close / timeout 정상 동작 확인
