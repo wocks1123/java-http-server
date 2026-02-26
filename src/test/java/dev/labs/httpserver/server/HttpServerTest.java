@@ -42,7 +42,7 @@ class HttpServerTest {
             response.setBody("OK");
         });
 
-        server = new HttpServer(0, servletContainer);
+        server = new HttpServer(0, servletContainer, 500);
         Thread serverThread = new Thread(server::start);
         serverThread.setDaemon(true);
         serverThread.start();

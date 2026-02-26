@@ -107,6 +107,93 @@ class HttpProcessorTest {
         assertNotNull(httpHandler.getCapturedResponse());
     }
 
+    @Test
+    @DisplayName("연속으로 들어온 두 요청을 모두 처리한다")
+    void handleProcessesMultipleRequestsOnSameConnection() {
+        // given
+        final String twoRequests =
+                "GET /first HTTP/1.1\r\nHost: localhost\r\n\r\n" +
+                "GET /second HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(twoRequests.getBytes());
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // when
+        sut.handle(inputStream, outputStream);
+
+        // then
+        assertEquals(2, httpHandler.getInvokeCount());
+    }
+
+    @Test
+    @DisplayName("연결 유지 요청에 대한 응답에 Connection: keep-alive 헤더가 포함된다")
+    void handleAddsKeepAliveHeaderForNormalRequest() {
+        // given
+        final byte[] rawRequest = "GET /test HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes();
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(rawRequest);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // when
+        sut.handle(inputStream, outputStream);
+
+        // then
+        final String rawResponse = outputStream.toString(StandardCharsets.UTF_8);
+        final String headerPart = rawResponse.split("\r\n\r\n", 2)[0];
+        assertTrue(headerPart.contains("Connection: keep-alive"));
+    }
+
+    @Test
+    @DisplayName("Connection: close 요청을 처리한 후 루프를 종료한다")
+    void handleStopsLoopAfterConnectionCloseRequest() {
+        // given
+        final String requests =
+                "GET /first HTTP/1.1\r\nConnection: close\r\n\r\n" +
+                "GET /second HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(requests.getBytes());
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // when
+        sut.handle(inputStream, outputStream);
+
+        // then
+        assertEquals(1, httpHandler.getInvokeCount());
+    }
+
+    @Test
+    @DisplayName("Connection: close 요청에 대한 응답에 Connection: close 헤더가 포함된다")
+    void handleAddsConnectionCloseHeaderForCloseRequest() {
+        // given
+        final byte[] rawRequest = "GET /test HTTP/1.1\r\nConnection: close\r\n\r\n".getBytes();
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(rawRequest);
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // when
+        sut.handle(inputStream, outputStream);
+
+        // then
+        final String rawResponse = outputStream.toString(StandardCharsets.UTF_8);
+        final String headerPart = rawResponse.split("\r\n\r\n", 2)[0];
+        assertTrue(headerPart.contains("Connection: close"));
+    }
+
+    @Test
+    @DisplayName("최대 요청 수 초과 시 루프를 종료한다")
+    void handleStopsLoopWhenMaxRequestsExceeded() {
+        // given
+        sut = new HttpProcessor(httpHandler, 2);
+        final String threeRequests =
+                "GET /first HTTP/1.1\r\nHost: localhost\r\n\r\n" +
+                "GET /second HTTP/1.1\r\nHost: localhost\r\n\r\n" +
+                "GET /third HTTP/1.1\r\nHost: localhost\r\n\r\n";
+        final ByteArrayInputStream inputStream = new ByteArrayInputStream(threeRequests.getBytes());
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // when
+        sut.handle(inputStream, outputStream);
+
+        // then
+        assertEquals(2, httpHandler.getInvokeCount());
+    }
+
     private static class SpyHttpHandler implements HttpHandler {
         private int invokeCount = 0;
         private HttpRequest capturedRequest;
