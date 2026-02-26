@@ -10,10 +10,14 @@ import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -192,6 +196,38 @@ class HttpProcessorTest {
 
         // then
         assertEquals(2, httpHandler.getInvokeCount());
+    }
+
+    @Test
+    @DisplayName("idle 타임아웃 시 예외 없이 루프를 종료한다")
+    void handleExitsGracefullyOnSocketTimeout() {
+        // given: 첫 번째 read는 요청 반환, 두 번째 read에서 SocketTimeoutException
+        final byte[] rawRequest = "GET /test HTTP/1.1\r\nHost: localhost\r\n\r\n".getBytes();
+        final InputStream inputStream = new InputStream() {
+            private int pos = 0;
+
+            @Override
+            public int read(byte[] buf, int off, int len) throws IOException {
+                if (pos < rawRequest.length) {
+                    int toRead = Math.min(len, rawRequest.length - pos);
+                    System.arraycopy(rawRequest, pos, buf, off, toRead);
+                    pos += toRead;
+                    return toRead;
+                }
+                throw new SocketTimeoutException("Read timed out");
+            }
+
+            @Override
+            public int read() throws IOException {
+                if (pos < rawRequest.length) return rawRequest[pos++];
+                throw new SocketTimeoutException("Read timed out");
+            }
+        };
+        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        // when & then
+        assertDoesNotThrow(() -> sut.handle(inputStream, outputStream));
+        assertEquals(1, httpHandler.getInvokeCount());
     }
 
     private static class SpyHttpHandler implements HttpHandler {
