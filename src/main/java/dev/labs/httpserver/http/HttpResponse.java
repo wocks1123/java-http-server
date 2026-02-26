@@ -83,7 +83,6 @@ public class HttpResponse {
 
         Map<String, String> tempHeaders = new LinkedHashMap<>(headers);
         tempHeaders.put("Content-Length", body == null ? "0" : Integer.toString(body.length));
-        tempHeaders.put("Connection", "close");
 
         tempHeaders.forEach((key, value) ->
                 response.append(key).append(": ").append(value).append("\r\n")

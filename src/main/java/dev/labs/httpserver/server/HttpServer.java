@@ -21,14 +21,21 @@ public class HttpServer {
     private final ServletContainer servletContainer;
 
     private static final int THREAD_POOL_SIZE = 10;
+    private static final int DEFAULT_KEEP_ALIVE_TIMEOUT_MS = 10_000;
 
+    private final int keepAliveTimeoutMs;
     private volatile boolean running = false;
     private ServerSocket serverSocket;
     private ExecutorService threadPool;
 
     public HttpServer(int port, ServletContainer servletContainer) {
+        this(port, servletContainer, DEFAULT_KEEP_ALIVE_TIMEOUT_MS);
+    }
+
+    public HttpServer(int port, ServletContainer servletContainer, int keepAliveTimeoutMs) {
         this.port = port;
         this.servletContainer = servletContainer;
+        this.keepAliveTimeoutMs = keepAliveTimeoutMs;
     }
 
     public void start() {
@@ -44,7 +51,10 @@ public class HttpServer {
                     RequestContext.init();
                     log.info("accept");
                     try {
+                        clientSocket.setSoTimeout(keepAliveTimeoutMs);
                         handleRequest(clientSocket, servletContainer);
+                    } catch (IOException e) {
+                        log.error("Error configuring client socket:", e);
                     } finally {
                         RequestContext.clear();
                     }
