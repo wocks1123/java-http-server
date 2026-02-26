@@ -133,24 +133,24 @@ Java 소켓 프로그래밍을 통해 HTTP 웹 서버를 직접 구현하는 학
 
 ### Keep-Alive (HTTP/1.1)
 
-* [ ] 연결 재사용 지원
-    * [ ] 요청 1회 처리 후 소켓 유지
-    * [ ] 동일 연결에서 다중 요청 처리
+* [x] 연결 재사용 지원
+    * [x] 요청 1회 처리 후 소켓 유지
+    * [x] 동일 연결에서 다중 요청 처리
 
 * [x] 요청 경계 처리 강화
     * [x] `\r\n\r\n` 기준 헤더 파싱 안정화
     * [x] `Content-Length` 기반 바디 정확히 읽기
     * [x] 남은 버퍼 재사용
 
-* [ ] 연결 종료 정책
-    * [ ] `Connection: close` 지원
-    * [ ] `keepAliveTimeout` 적용
-    * [ ] `maxRequestsPerConnection` 제한
+* [x] 연결 종료 정책
+    * [x] `Connection: close` 지원
+    * [x] `keepAliveTimeout` 적용
+    * [x] `maxRequestsPerConnection` 제한
 
-* [ ] 응답 정합성 보장
-    * [ ] `Content-Length` 정확히 설정
-    * [ ] keep-alive / close 헤더 일관성 유지
+* [x] 응답 정합성 보장
+    * [x] `Content-Length` 정확히 설정
+    * [x] keep-alive / close 헤더 일관성 유지
 
-* [ ] 통합 테스트
-    * [ ] 동일 연결 다중 요청 성공
-    * [ ] close / timeout 정상 동작 확인
+* [x] 통합 테스트
+    * [x] 동일 연결 다중 요청 성공
+    * [x] close / timeout 정상 동작 확인
