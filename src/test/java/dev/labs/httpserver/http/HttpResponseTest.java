@@ -126,10 +126,56 @@ class HttpResponseTest {
         final String firstLine = fullResponse.split("\r\n")[0];
         assertEquals("HTTP/1.1 200 OK", firstLine);
 
-        String headers = fullResponse.split("\r\n\r\n", 2)[0];
+        final String headers = fullResponse.split("\r\n\r\n", 2)[0];
         assertTrue(headers.contains("Content-Type: text/plain"));
-        assertTrue(headers.contains("Connection: close"));
         assertTrue(headers.contains("Content-Length: 0"));
+    }
+
+    @Test
+    @DisplayName("Connection 헤더를 설정하지 않으면 응답에 포함되지 않는다")
+    void connectionHeaderIsAbsentWhenNotSet() {
+        // given
+        final HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.OK);
+
+        // when
+        final String rawResponse = new String(response.toBytes(), StandardCharsets.UTF_8);
+        final String headerPart = rawResponse.split("\r\n\r\n", 2)[0];
+
+        // then
+        assertFalse(headerPart.contains("Connection:"));
+    }
+
+    @Test
+    @DisplayName("Connection: close 헤더를 설정하면 응답에 포함된다")
+    void connectionCloseHeaderIsIncludedWhenSet() {
+        // given
+        final HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.OK);
+        response.addHeader("Connection", "close");
+
+        // when
+        final String rawResponse = new String(response.toBytes(), StandardCharsets.UTF_8);
+        final String headerPart = rawResponse.split("\r\n\r\n", 2)[0];
+
+        // then
+        assertTrue(headerPart.contains("Connection: close"));
+    }
+
+    @Test
+    @DisplayName("Connection: keep-alive 헤더를 설정하면 응답에 포함된다")
+    void connectionKeepAliveHeaderIsIncludedWhenSet() {
+        // given
+        final HttpResponse response = new HttpResponse();
+        response.setStatus(HttpStatus.OK);
+        response.addHeader("Connection", "keep-alive");
+
+        // when
+        final String rawResponse = new String(response.toBytes(), StandardCharsets.UTF_8);
+        final String headerPart = rawResponse.split("\r\n\r\n", 2)[0];
+
+        // then
+        assertTrue(headerPart.contains("Connection: keep-alive"));
     }
 
     @Test
@@ -142,10 +188,10 @@ class HttpResponseTest {
         response.addHeader("Content-Type", "text/plain");
 
         // when
-        String responseString = new String(response.toBytes(), StandardCharsets.UTF_8);
+        final String responseString = new String(response.toBytes(), StandardCharsets.UTF_8);
 
         // then
-        String[] parts = responseString.split("\r\n\r\n", 2);
+        final String[] parts = responseString.split("\r\n\r\n", 2);
         assertEquals(2, parts.length);
         assertEquals("Response Body", parts[1]);
     }
