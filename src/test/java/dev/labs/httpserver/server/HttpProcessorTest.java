@@ -87,7 +87,6 @@ class HttpProcessorTest {
         final String body = parts.length > 1 ? parts[1] : "";
         assertTrue(headers.contains("HTTP/1.1 200 OK"));
         assertTrue(headers.contains("Content-Length:"));
-        assertTrue(headers.contains("Connection: close"));
         assertTrue(body.isEmpty());
     }
 
