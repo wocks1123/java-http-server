@@ -38,7 +38,7 @@ tasks.test {
 }
 
 application {
-    mainClass.set("dev.labs.WebServer")
+    mainClass.set("dev.labs.httpserver.HttpServerApplication")
 }
 
 tasks.withType<JavaCompile> {
